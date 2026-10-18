@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../../api';
 import { StatCard } from '../../components/StatCard';
 import { BannerAlert } from '../../components/BannerAlert';
 import { OfficialReceiptModal } from '../../components/OfficialReceiptModal';
+import { RefreshCw, Search, CheckCircle2, CreditCard, Filter, Calendar, FileText } from 'lucide-react';
 
 export function PaymentQueue() {
   const [payments, setPayments] = useState([]);
   const [pendingReqs, setPendingReqs] = useState([]);
   const [totalCollections, setTotalCollections] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [docFilter, setDocFilter] = useState('ALL');
 
   const [receiptModal, setReceiptModal] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('cash');
@@ -59,7 +64,21 @@ export function PaymentQueue() {
     }
   };
 
-  if (loading) {
+  const filteredRequests = useMemo(() => {
+    return pendingReqs.filter((r) => {
+      if (docFilter !== 'ALL' && r.document_type !== docFilter) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesTracking = (r.tracking_number || '').toLowerCase().includes(q);
+        const matchesName = (r.student_name || '').toLowerCase().includes(q);
+        const matchesNumber = (r.student_number || '').toLowerCase().includes(q);
+        if (!matchesTracking && !matchesName && !matchesNumber) return false;
+      }
+      return true;
+    });
+  }, [pendingReqs, docFilter, searchQuery]);
+
+  if (loading && pendingReqs.length === 0) {
     return <div className="card"><p>Loading cashier queue...</p></div>;
   }
 
@@ -92,46 +111,95 @@ export function PaymentQueue() {
       </div>
 
       <div className="card">
-        <div className="card-header-bar">
+        <div className="card-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem' }}>
           <div>
             <h3>Assessment Fee Billing & Payment Verification Queue</h3>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
               Swimlane Step: Verify student payment and issue Official Receipt to advance document request to processing
             </p>
           </div>
-          <button className="btn btn-sm btn-secondary" onClick={loadData}>
-            🔄 Refresh
+          <button className="btn btn-sm btn-secondary" onClick={() => loadData(false)}>
+            <RefreshCw size={14} />
+            Refresh
           </button>
         </div>
 
-        {pendingReqs.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)' }}>No pending payments in queue. All assessments are settled.</p>
+        {/* Filter & Search Bar */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem', background: '#f8faf8', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: '1 1 240px' }}>
+            <div style={{ position: 'relative', width: '100%' }}>
+              <Search size={15} style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                placeholder="Search tracking #, student name, or ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ width: '100%', padding: '0.45rem 0.65rem 0.45rem 2.2rem', fontSize: '0.85rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+              <Filter size={13} /> Document:
+            </span>
+            {['ALL', 'TOR', 'COR', 'Certification'].map((doc) => (
+              <button
+                key={doc}
+                type="button"
+                onClick={() => setDocFilter(doc)}
+                style={{
+                  padding: '0.25rem 0.65rem',
+                  fontSize: '0.78rem',
+                  borderRadius: '20px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  border: docFilter === doc ? '1px solid var(--primary)' : '1px solid var(--border)',
+                  background: docFilter === doc ? 'var(--primary)' : '#fff',
+                  color: docFilter === doc ? '#fff' : 'var(--text-muted)',
+                }}
+              >
+                {doc}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filteredRequests.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', padding: '1rem 0' }}>
+            {pendingReqs.length === 0 ? 'No pending payments in queue. All assessments are settled.' : 'No matching pending requests found for the selected filter.'}
+          </p>
         ) : (
           <div className="table-responsive">
             <table>
               <thead>
                 <tr>
-                  <th>Tracking Number</th>
-                  <th>Student Name</th>
-                  <th>Student Number</th>
-                  <th>Document</th>
-                  <th>Assessment Fee</th>
-                  <th>Date Filed</th>
-                  <th>Action</th>
+                  <th style={{ minWidth: '130px' }}>Tracking Number</th>
+                  <th style={{ minWidth: '160px' }}>Student Name</th>
+                  <th style={{ minWidth: '110px' }}>Student Number</th>
+                  <th style={{ minWidth: '90px' }}>Document</th>
+                  <th style={{ minWidth: '100px' }}>Assessment Fee</th>
+                  <th style={{ minWidth: '100px' }}>Date Filed</th>
+                  <th style={{ minWidth: '120px' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {pendingReqs.map((r) => (
+                {filteredRequests.map((r) => (
                   <tr key={r.id}>
-                    <td><strong>{r.tracking_number}</strong></td>
+                    <td><strong style={{ fontFamily: 'monospace', fontSize: '0.86rem' }}>{r.tracking_number}</strong></td>
                     <td>{r.student_name}</td>
-                    <td>{r.student_number}</td>
-                    <td>{r.document_type}</td>
-                    <td><strong style={{ color: 'var(--primary-dark)' }}>₱{r.assessment_fee.toFixed(2)}</strong></td>
-                    <td>{r.requested_date}</td>
+                    <td><code style={{ fontSize: '0.82rem' }}>{r.student_number}</code></td>
+                    <td><span className="badge badge-info">{r.document_type}</span></td>
+                    <td><strong style={{ color: 'var(--primary-dark)', fontSize: '0.95rem' }}>₱{r.assessment_fee.toFixed(2)}</strong></td>
+                    <td style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{r.requested_date}</td>
                     <td>
-                      <button className="btn btn-sm btn-accent" onClick={() => setReceiptModal(r)}>
-                        Verify & Issue Official Receipt
+                      <button
+                        className="btn btn-sm btn-accent"
+                        style={{ whiteSpace: 'nowrap', padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
+                        onClick={() => setReceiptModal(r)}
+                      >
+                        <CheckCircle2 size={14} />
+                        Issue Receipt
                       </button>
                     </td>
                   </tr>
@@ -147,7 +215,10 @@ export function PaymentQueue() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>Issue Official University Receipt</h3>
+              <h3 style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <CreditCard size={18} color="var(--primary)" />
+                Issue Official University Receipt
+              </h3>
               <button className="modal-close-btn" onClick={() => setReceiptModal(null)}>×</button>
             </div>
             <form onSubmit={handleIssueReceipt}>
@@ -182,7 +253,10 @@ export function PaymentQueue() {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setReceiptModal(null)}>Cancel</button>
-                <button type="submit" className="btn btn-accent">Confirm & Issue Official Receipt</button>
+                <button type="submit" className="btn btn-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <CheckCircle2 size={15} />
+                  Confirm & Issue Official Receipt
+                </button>
               </div>
             </form>
           </div>

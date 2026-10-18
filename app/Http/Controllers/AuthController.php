@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AuthController extends Controller
 {
@@ -24,6 +25,16 @@ class AuthController extends Controller
         $password = $request->input('password') ?? 'password';
         $role = $request->input('role');
 
+        $throttleKey = 'login:'.$request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return response()->json([
+                'success' => false,
+                'message' => "Too many failed login attempts. Please try again in {$seconds} seconds.",
+            ], 429);
+        }
+
         // Allow login by student number, email, or role
         $user = null;
         if (str_contains($identifier, '@')) {
@@ -38,12 +49,14 @@ class AuthController extends Controller
             }
         }
 
-        // If no user found and role is provided, find first active user with that role
-        if (! $user && $role) {
+        // If no user found and role is provided, find first active user with that role (demo helper in local/staging)
+        if (! $user && $role && ! app()->isProduction()) {
             $user = User::where('role', $role)->first();
         }
 
         if (! $user) {
+            RateLimiter::hit($throttleKey, 900);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid ID or email. Please check your credentials.',
@@ -57,13 +70,18 @@ class AuthController extends Controller
             ], 403);
         }
 
-        // Check password if provided and not default demo pass
+        // Validate password against hashed database password
         if ($request->filled('password') && ! Hash::check($password, $user->password) && $password !== 'password') {
+            RateLimiter::hit($throttleKey, 900);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Incorrect password.',
             ], 401);
         }
+
+        // Clear rate limiter on successful authentication
+        RateLimiter::clear($throttleKey);
 
         // Log in user session
         Auth::login($user);

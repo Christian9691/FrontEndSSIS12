@@ -95,6 +95,7 @@ FrontEndSSIS12/
 ├── tests/
 │   └── Feature/
 │       └── DocumentRequestWorkflowTest.php     # 8 end-to-end automated tests with 29 assertions
+├── CUYOTECH_SSIS_FINAL_PROJECT.md              # Official term paper and case study submission (Pamantasan ng Cabuyao CCS109)
 └── PROJECT_DOCUMENTATION.md                    # Detailed architectural and SAD compliance documentation
 ```
 

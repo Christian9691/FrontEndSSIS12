@@ -17,7 +17,8 @@ class ResolveHeaderUser
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::check() && $request->hasHeader('X-User-Id')) {
+        // Only permit header-based identity resolution in non-production environments when session is not set
+        if (! Auth::check() && ! app()->isProduction() && $request->hasHeader('X-User-Id')) {
             $userId = (int) $request->header('X-User-Id');
             $user = User::find($userId);
             if ($user && $user->status === 'active') {

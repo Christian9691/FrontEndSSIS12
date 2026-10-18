@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../api';
+import { RefreshCw } from 'lucide-react';
 
 export function AuditLogs() {
   const [logs, setLogs] = useState([]);
@@ -39,8 +40,9 @@ export function AuditLogs() {
               Real-time audit log synchronized with the database for all system events and transactions
             </p>
           </div>
-          <button className="btn btn-sm btn-secondary" onClick={() => loadLogs(false)} disabled={loading}>
-            {loading ? 'Refreshing...' : '🔄 Refresh Logs'}
+          <button className="btn btn-sm btn-secondary" onClick={() => loadLogs(false)} disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Refreshing...' : 'Refresh Logs'}
           </button>
         </div>
 

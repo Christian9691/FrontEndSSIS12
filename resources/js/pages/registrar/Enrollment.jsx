@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../api';
 import { StatusBadge } from '../../components/StatusBadge';
 import { BannerAlert } from '../../components/BannerAlert';
+import { CheckCircle2, RefreshCw } from 'lucide-react';
 
 export function Enrollment() {
   const [enrollments, setEnrollments] = useState([]);
@@ -38,13 +39,17 @@ export function Enrollment() {
       {msg && <BannerAlert type={msg.type} message={msg.text} style={{ marginBottom: '1.2rem' }} />}
 
       <div className="card">
-        <div className="card-header-bar">
+        <div className="card-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h3>Student Enrollment Management</h3>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
               Review and officially certify enrolled students for current term
             </p>
           </div>
+          <button className="btn btn-sm btn-secondary" onClick={loadEnrollments}>
+            <RefreshCw size={14} />
+            Refresh
+          </button>
         </div>
 
         <div className="table-responsive">
@@ -66,18 +71,22 @@ export function Enrollment() {
                 <tr key={s.id}>
                   <td><strong>{s.student_number}</strong></td>
                   <td>{s.name}</td>
-                  <td>{s.course}</td>
+                  <td><span className="badge badge-neutral" style={{ fontWeight: 700 }}>{s.course}</span></td>
                   <td>Year {s.year_level}</td>
                   <td>{s.total_units} units</td>
                   <td><StatusBadge status={s.clearance_status ? 'cleared' : 'hold'} /></td>
                   <td><StatusBadge status={s.enrollment_status} /></td>
                   <td>
                     {s.enrollment_status === 'Pending' ? (
-                      <button className="btn btn-sm btn-accent" onClick={() => handleApproveEnrollment(s.id)}>
+                      <button className="btn btn-sm btn-accent" style={{ padding: '0.3rem 0.65rem' }} onClick={() => handleApproveEnrollment(s.id)}>
+                        <CheckCircle2 size={13} />
                         Approve Enrollment
                       </button>
                     ) : (
-                      <span style={{ fontSize: '0.8rem', color: 'var(--success)' }}>✓ Enrolled</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--success)', fontWeight: 600 }}>
+                        <CheckCircle2 size={14} />
+                        Enrolled
+                      </span>
                     )}
                   </td>
                 </tr>

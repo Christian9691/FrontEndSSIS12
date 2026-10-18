@@ -6,6 +6,7 @@ import { StatCard } from '../../components/StatCard';
 import { BannerAlert } from '../../components/BannerAlert';
 import { OfficialDocumentModal } from '../../components/OfficialDocumentModal';
 import { OfficialReceiptModal } from '../../components/OfficialReceiptModal';
+import { CheckCircle2, AlertTriangle, RefreshCw, Plus } from 'lucide-react';
 
 import { useAuth } from '../../context/AuthContext';
 
@@ -78,12 +79,14 @@ export function StudentDashboard() {
             <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Clearance Eligibility</div>
             <div style={{ marginTop: '0.3rem' }}>
               {student.clearance_status ? (
-                <span className="badge badge-success" style={{ fontSize: '0.9rem', padding: '0.35rem 0.8rem' }}>
-                  ✓ Cleared for Services
+                <span className="badge badge-success" style={{ fontSize: '0.85rem', padding: '0.35rem 0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <CheckCircle2 size={15} />
+                  Cleared for Services
                 </span>
               ) : (
-                <span className="badge badge-danger" style={{ fontSize: '0.9rem', padding: '0.35rem 0.8rem' }}>
-                  ✕ Clearance Hold Active
+                <span className="badge badge-danger" style={{ fontSize: '0.85rem', padding: '0.35rem 0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <AlertTriangle size={15} />
+                  Clearance Hold Active
                 </span>
               )}
             </div>
@@ -121,10 +124,12 @@ export function StudentDashboard() {
           <h3>Recent Document Requests & Status Tracking</h3>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button className="btn btn-sm btn-secondary" onClick={loadData}>
-              🔄 Refresh
+              <RefreshCw size={14} />
+              Refresh
             </button>
-            <Link to="/student/requests" className="btn btn-sm btn-accent">
-              + New Document Request
+            <Link to="/student/requests" className="btn btn-sm btn-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Plus size={14} />
+              New Document Request
             </Link>
           </div>
         </div>

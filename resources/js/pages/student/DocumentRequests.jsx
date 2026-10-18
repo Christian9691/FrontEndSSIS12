@@ -4,6 +4,7 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { OfficialDocumentModal } from '../../components/OfficialDocumentModal';
 import { OfficialReceiptModal } from '../../components/OfficialReceiptModal';
 import { DOC_TYPE_FEES } from '../../config';
+import { Send, FileText, Receipt, AlertTriangle } from 'lucide-react';
 
 export function DocumentRequests() {
   const [requests, setRequests] = useState([]);
@@ -113,6 +114,7 @@ export function DocumentRequests() {
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
                 placeholder="e.g. Scholarship application, Employment, Board exam filing"
+                style={{ resize: 'none' }}
                 required
               />
             </div>
@@ -125,6 +127,7 @@ export function DocumentRequests() {
             </div>
 
             <button type="submit" className="btn btn-accent" style={{ width: '100%' }} disabled={submitting}>
+              <Send size={15} />
               {submitting ? 'Verifying Clearance & Submitting...' : 'Submit Request'}
             </button>
           </form>
@@ -178,12 +181,14 @@ export function DocumentRequests() {
                     <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                       {r.payment && (
                         <button className="btn btn-secondary btn-sm" onClick={() => setActiveReceipt(r)}>
+                          <Receipt size={13} />
                           Official Receipt
                         </button>
                       )}
                       {r.processing_status === 'released' && (
                         <button className="btn btn-sm" onClick={() => setActivePreviewDoc(r)}>
-                          View / Print Document
+                          <FileText size={13} />
+                          View Document
                         </button>
                       )}
                       {r.processing_status === 'pending_payment' && (
@@ -205,7 +210,10 @@ export function DocumentRequests() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header" style={{ borderBottomColor: '#fecaca', background: '#fef2f2' }}>
-              <h3 style={{ color: 'var(--danger)' }}>⚠️ Request Blocked by Clearance Hold</h3>
+              <h3 style={{ color: 'var(--danger)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <AlertTriangle size={18} />
+                Request Blocked by Clearance Hold
+              </h3>
               <button className="modal-close-btn" onClick={() => setHoldModal(null)}>×</button>
             </div>
             <div className="modal-body">

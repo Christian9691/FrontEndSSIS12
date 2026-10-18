@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\ClearanceRecord;
 use App\Models\Enrollment;
+use App\Models\Notification;
 use App\Models\Student;
 use App\Models\Subject;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,11 +20,11 @@ class StudentController extends Controller
     protected function resolveStudent(Request $request): ?Student
     {
         $user = Auth::user();
-        if ($user && $user->role === 'student' && $user->student) {
+        if ($user && $user->role === 'student') {
             return $user->student;
         }
 
-        // Fallback for demo or studentId query param
+        // Staff (Registrar, Admin, Department) can inspect a specific student via student_id
         $studentId = $request->query('student_id');
         if ($studentId) {
             return Student::with(['user', 'course.department'])->find($studentId);
@@ -173,8 +175,57 @@ class StudentController extends Controller
                 'signatory' => $r->signatory_name,
                 'status' => $r->status, // 'cleared', 'hold'
                 'hold_reason' => $r->hold_reason,
+                'appeal_notes' => $r->appeal_notes,
+                'appeal_status' => $r->appeal_status,
+                'appeal_submitted_at' => $r->appeal_submitted_at?->format('M d, Y h:i A'),
                 'cleared_at' => $r->cleared_at?->format('M d, Y h:i A'),
             ]),
+        ]);
+    }
+
+    public function submitClearanceAppeal(Request $request): JsonResponse
+    {
+        $student = $this->resolveStudent($request);
+        if (! $student) {
+            return response()->json(['error' => 'Student record not found.'], 404);
+        }
+
+        $request->validate([
+            'clearance_record_id' => 'required|exists:clearance_records,id',
+            'appeal_notes' => 'required|string|max:1000',
+        ]);
+
+        $record = ClearanceRecord::where('id', $request->input('clearance_record_id'))
+            ->where('student_id', $student->id)
+            ->firstOrFail();
+
+        $record->update([
+            'appeal_notes' => $request->input('appeal_notes'),
+            'appeal_status' => 'pending',
+            'appeal_submitted_at' => now(),
+        ]);
+
+        // Dispatch in-app notification to department staff
+        $deptStaff = User::where('role', 'department')->first();
+        if ($deptStaff) {
+            Notification::send(
+                $deptStaff->id,
+                'New Clearance Appeal Submitted',
+                "Student {$student->user->name} ({$student->student_number}) submitted an appeal for {$record->signatory_name}.",
+                'clearance',
+                '/department'
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your clearance appeal has been submitted for department officer review.',
+            'record' => [
+                'id' => $record->id,
+                'appeal_notes' => $record->appeal_notes,
+                'appeal_status' => $record->appeal_status,
+                'appeal_submitted_at' => $record->appeal_submitted_at->format('M d, Y h:i A'),
+            ],
         ]);
     }
 }

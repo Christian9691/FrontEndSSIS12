@@ -4,9 +4,11 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DocumentRequestController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RegistrarController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication Endpoints
@@ -22,6 +24,14 @@ Route::prefix('api/student')->group(function () {
     Route::get('/grades', [StudentController::class, 'grades']);
     Route::get('/subjects', [StudentController::class, 'subjects']);
     Route::get('/clearance', [StudentController::class, 'clearance']);
+    Route::post('/clearance/appeal', [StudentController::class, 'submitClearanceAppeal']);
+});
+
+// Notifications Endpoints
+Route::prefix('api/notifications')->group(function () {
+    Route::get('/', [NotificationController::class, 'index']);
+    Route::patch('/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead']);
 });
 
 // Document Request System (Shared: Student request & tracking + Staff processing)
@@ -36,6 +46,7 @@ Route::prefix('api/document-requests')->group(function () {
 Route::prefix('api/payments')->group(function () {
     Route::get('/', [PaymentController::class, 'index']);
     Route::post('/issue-receipt', [PaymentController::class, 'issueReceipt']);
+    Route::get('/export-coa', [PaymentController::class, 'exportCoa']);
 });
 
 // Registrar Module Endpoints
@@ -60,6 +71,10 @@ Route::prefix('api/admin')->group(function () {
     Route::post('/users', [AdminController::class, 'createUser']);
     Route::patch('/users/{id}/status', [AdminController::class, 'toggleStatus']);
 });
+
+// Public Credential Verification Endpoints (Rate-limited, Privacy-Preserving)
+Route::get('/api/v1/verify/{token}', [VerificationController::class, 'verify']);
+Route::get('/api/verify/{token}', [VerificationController::class, 'verify']);
 
 // Catch-all SPA Route: Serves the React Application
 Route::get('/{any?}', fn () => view('app'))->where('any', '.*');

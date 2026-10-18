@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ROLES, DEMO_USERS } from '../config';
+import { LogIn } from 'lucide-react';
 
 export function Login() {
   const { login } = useAuth();
@@ -92,9 +93,10 @@ export function Login() {
           <button
             type="submit"
             className="btn btn-accent"
-            style={{ width: '100%', marginTop: '0.5rem' }}
+            style={{ width: '100%', marginTop: '0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
             disabled={loading}
           >
+            <LogIn size={16} />
             {loading ? 'Authenticating...' : 'Sign In to SSIS'}
           </button>
         </form>

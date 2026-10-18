@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\ClearanceRecord;
 use App\Models\DocumentRequest;
+use App\Models\Notification;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -94,6 +96,18 @@ class DocumentRequestController extends Controller
             "Submitted {$docRequest->document_type} request with tracking #{$trackingNumber}. Assessment fee: ₱{$fee}"
         );
 
+        // Notify Cashier
+        $cashier = User::where('role', 'cashier')->first();
+        if ($cashier) {
+            Notification::send(
+                $cashier->id,
+                'New Assessment Fee Pending',
+                "New {$docRequest->document_type} request (#{$trackingNumber}) by {$student->user->name} pending fee settlement of ₱{$fee}.",
+                'payment',
+                '/cashier'
+            );
+        }
+
         $docRequest->load(['student.user', 'student.course']);
 
         return response()->json([
@@ -105,10 +119,19 @@ class DocumentRequestController extends Controller
 
     public function show(string $trackingNumber): JsonResponse
     {
+        $user = Auth::user();
         $req = DocumentRequest::with(['student.user', 'student.course.department', 'assignedAdmin', 'payment.processedBy'])
             ->where('tracking_number', $trackingNumber)
             ->orWhere('id', $trackingNumber)
             ->firstOrFail();
+
+        // Object-level authorization check (IDOR Prevention)
+        if ($user && $user->role === 'student' && $user->student && $req->student_id !== $user->student->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access. You may only view your own document requests.',
+            ], 403);
+        }
 
         return response()->json([
             'request' => $this->formatRequestData($req),
@@ -117,12 +140,20 @@ class DocumentRequestController extends Controller
 
     public function updateStatus(Request $request, int $id): JsonResponse
     {
+        $user = Auth::user();
+        if ($user && ! in_array($user->role, ['registrar', 'admin'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only the Registrar or Administrator can update request processing status.',
+            ], 403);
+        }
+
         $request->validate([
             'status' => 'required|in:pending_payment,paid,processing,ready_for_pickup,released,rejected',
             'assigned_admin_id' => 'nullable|exists:users,id',
         ]);
 
-        $docRequest = DocumentRequest::findOrFail($id);
+        $docRequest = DocumentRequest::with('student.user')->findOrFail($id);
         $newStatus = $request->input('status');
 
         $docRequest->processing_status = $newStatus;
@@ -135,12 +166,31 @@ class DocumentRequestController extends Controller
 
         if ($newStatus === 'released') {
             $docRequest->release_date = now();
+            $docRequest->issueVerificationSeal();
+        } else {
+            $docRequest->save();
         }
 
-        $docRequest->save();
+        // Notify student of status update
+        if ($docRequest->student?->user_id) {
+            $statusText = match ($newStatus) {
+                'ready_for_pickup' => 'Your document is printed and ready for pickup at Window 4.',
+                'released' => 'Your official document has been cryptographically certified and released.',
+                'processing' => 'Your request is currently being verified and printed by the Registrar.',
+                'rejected' => 'Your request could not be processed. Please check with the Registrar office.',
+                default => "Request status updated to {$newStatus}."
+            };
+            Notification::send(
+                $docRequest->student->user_id,
+                'Document Status: '.ucfirst(str_replace('_', ' ', $newStatus)),
+                "Tracking #{$docRequest->tracking_number} ({$docRequest->document_type}): {$statusText}",
+                'document',
+                '/student/requests'
+            );
+        }
 
         AuditLog::record(
-            Auth::id(),
+            Auth::id() ?? 2,
             'Document Request Status Updated',
             "Updated tracking #{$docRequest->tracking_number} status to '{$newStatus}'"
         );
@@ -174,6 +224,9 @@ class DocumentRequestController extends Controller
             'requested_date' => $req->requested_date?->format('Y-m-d H:i'),
             'release_date' => $req->release_date?->format('Y-m-d H:i'),
             'assigned_admin' => $req->assignedAdmin?->name,
+            'verification_token' => $req->verification_token,
+            'signature' => $req->signature,
+            'verification_url' => url('/verify/'.($req->verification_token ?: $req->tracking_number)),
             'payment' => $payment ? [
                 'id' => $payment->id,
                 'official_receipt_no' => $payment->official_receipt_no,

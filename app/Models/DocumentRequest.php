@@ -21,6 +21,8 @@ class DocumentRequest extends Model
         'assessment_fee',
         'requested_date',
         'release_date',
+        'verification_token',
+        'signature',
     ];
 
     protected function casts(): array
@@ -72,5 +74,35 @@ class DocumentRequest extends Model
         } while (self::where('tracking_number', $code)->exists());
 
         return $code;
+    }
+
+    /**
+     * Generate 128-bit cryptographically secure verification token
+     */
+    public static function generateVerificationToken(): string
+    {
+        do {
+            $token = bin2hex(random_bytes(16));
+        } while (self::where('verification_token', $token)->exists());
+
+        return $token;
+    }
+
+    /**
+     * Compute and issue HMAC-SHA256 verification seal
+     */
+    public function issueVerificationSeal(): void
+    {
+        if (! $this->verification_token) {
+            $this->verification_token = self::generateVerificationToken();
+        }
+
+        $studentNumber = $this->student?->student_number ?? 'STUDENT';
+        $releaseTime = $this->release_date?->toISOString() ?? now()->toISOString();
+        $key = config('app.key') ?: 'cuyotech-ssis-secret-key';
+
+        $payload = "{$this->verification_token}|{$this->tracking_number}|{$studentNumber}|{$releaseTime}";
+        $this->signature = hash_hmac('sha256', $payload, $key);
+        $this->save();
     }
 }

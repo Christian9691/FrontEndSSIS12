@@ -22,6 +22,8 @@ return new class extends Migration
             $table->decimal('assessment_fee', 10, 2);
             $table->dateTime('requested_date');
             $table->dateTime('release_date')->nullable();
+            $table->string('verification_token', 64)->nullable()->unique();
+            $table->string('signature', 128)->nullable();
             $table->timestamps();
         });
     }

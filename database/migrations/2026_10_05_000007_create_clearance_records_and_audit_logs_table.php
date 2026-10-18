@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('signatory_name', 100)->default('Department Office');
             $table->string('status', 30)->default('cleared'); // 'cleared', 'hold'
             $table->string('hold_reason', 255)->nullable();
+            $table->text('appeal_notes')->nullable();
+            $table->string('appeal_status', 30)->nullable(); // 'pending', 'resolved', null
+            $table->dateTime('appeal_submitted_at')->nullable();
             $table->dateTime('cleared_at')->nullable();
             $table->timestamps();
         });

@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\Department;
 use App\Models\DocumentRequest;
 use App\Models\Enrollment;
+use App\Models\Notification;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\Subject;
@@ -61,7 +62,7 @@ class DatabaseSeeder extends Seeder
             'department_id' => $ccs->id,
             'course_code' => 'BSCS',
             'course_title' => 'Bachelor of Science in Computer Science',
-            'total_units' => 150,
+            'total_units' => 157,
         ]);
 
         $bsis = Course::create([
@@ -71,15 +72,84 @@ class DatabaseSeeder extends Seeder
             'total_units' => 142,
         ]);
 
-        // 3. Subjects for BSIT / BSCS
+        // 3. Subjects for BSIT
         $it201 = Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT201', 'subject_title' => 'Data Structures and Algorithms', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
         $it202 = Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT202', 'subject_title' => 'Systems Analysis and Design', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
         $it203 = Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT203', 'subject_title' => 'Web Systems and Technologies', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
         $ge104 = Subject::create(['course_id' => $bsit->id, 'subject_code' => 'GE104', 'subject_title' => 'Ethics and Professional Conduct', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
         $it205 = Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT205', 'subject_title' => 'Database Management Systems 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
 
-        $cs301 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CS301', 'subject_title' => 'Automata Theory and Formal Languages', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
-        $cs302 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CS302', 'subject_title' => 'Software Engineering', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        // 3.1 Official University of Cabuyao (PnC) BSCS Curriculum Subjects
+        // 1st Year : 1st Semester (24 units)
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS101', 'subject_title' => 'Introduction to Computing', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS102', 'subject_title' => 'Computer Programming 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'GAD101', 'subject_title' => 'Gender and Development', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'MAT101', 'subject_title' => 'Mathematics in the Modern World', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'NSTP1', 'subject_title' => 'National Service Training Program 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'PED101', 'subject_title' => 'Physical Activities Toward Health and Fitness 1', 'units' => 2, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'PHD101', 'subject_title' => 'PnCians Holistic Development 1', 'units' => 1, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'PSY100', 'subject_title' => 'Understanding the Self', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'READ100', 'subject_title' => 'Science and Development of Reading', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+
+        // 1st Year : 2nd Semester (24 units)
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS103', 'subject_title' => 'Computer Programming 2', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS105', 'subject_title' => 'Human Computer Interaction 1', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS114', 'subject_title' => 'Web Technologies', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'COM101', 'subject_title' => 'Purposive Communication', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'HIS101', 'subject_title' => 'Readings in Philippine History', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'HMN101', 'subject_title' => 'Art Appreciation', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'NSTP2', 'subject_title' => 'National Service Training Program 2', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'PED102', 'subject_title' => 'Physical Activities Toward Health and Fitness 2', 'units' => 2, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'PHD102', 'subject_title' => 'PnCians Holistic Development 2', 'units' => 1, 'semester' => '2nd Semester', 'year_level' => 1]);
+
+        // 2nd Year : 1st Semester (23 units)
+        $ccs104 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS104', 'subject_title' => 'Discrete Structures 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        $ccs107 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS107', 'subject_title' => 'Data Structures and Algorithms', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        $csp101 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP101', 'subject_title' => 'Differential Calculus with Analytical Geometry', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        $ent101 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'ENT101', 'subject_title' => 'The Entrepreneurial Mind', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        $eth101 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'ETH101', 'subject_title' => 'Ethics', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        $ped103 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'PED103', 'subject_title' => 'Physical Activities Toward Health and Fitness 3', 'units' => 2, 'semester' => '1st Semester', 'year_level' => 2]);
+        $soc101 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'SOC101', 'subject_title' => 'The Contemporary World', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        $sts101 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'STS101', 'subject_title' => 'Science, Technology and Society', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+
+        // 2nd Year : 2nd Semester (26 units)
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS108', 'subject_title' => 'Object-Oriented Programming', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS110', 'subject_title' => 'Information Management 1', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS113', 'subject_title' => 'Information Assurance Security', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CNT101', 'subject_title' => 'Number Theory', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP102', 'subject_title' => 'Discrete Structures 2', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP104', 'subject_title' => 'Integral Calculus with Differential Equation', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP107', 'subject_title' => 'Computer Organization and Assembly Language', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'PED104', 'subject_title' => 'Physical Activities Toward Health and Fitness 4', 'units' => 2, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'RIZ101', 'subject_title' => 'Life and Works of Rizal', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+
+        // 3rd Year : 1st Semester (21 units)
+        $ccs106 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS106', 'subject_title' => 'Social Issues and Professional Practice', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        $ccs109 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS109', 'subject_title' => 'System Analysis and Design', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        $ccs112 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS112', 'subject_title' => 'Applications Development and Emerging Technologies', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        $cseg1 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSEG1', 'subject_title' => 'Game Concepts and Production', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        $csp105 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP105', 'subject_title' => 'Algorithms and Complexity', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        $csp108 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP108', 'subject_title' => 'Programming Languages', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        $env101 = Subject::create(['course_id' => $bscs->id, 'subject_code' => 'ENV101', 'subject_title' => 'Environmental Science', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+
+        // 3rd Year : 2nd Semester (18 units)
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSEG2', 'subject_title' => 'Game Programming 1', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP106', 'subject_title' => 'Automata Theory and Formal Languages', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP109', 'subject_title' => 'Software Engineering 1', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP111', 'subject_title' => 'Thesis 1', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP112', 'subject_title' => 'Operating Systems', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'TEC101', 'subject_title' => 'Technopreneurship', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+
+        // 4th Year : 1st Semester (17 units)
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS111', 'subject_title' => 'Networking and Communication 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CPS101', 'subject_title' => 'Probability and Statistics', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSEG3', 'subject_title' => 'Game Programming 2', 'units' => 2, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP110', 'subject_title' => 'Numerical Analysis', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP113', 'subject_title' => 'Software Engineering 2', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP114', 'subject_title' => 'Thesis 2', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+
+        // 4th Year : 2nd Semester (4 units)
+        Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CSP115', 'subject_title' => 'CS Practicum (300 hours)', 'units' => 4, 'semester' => '2nd Semester', 'year_level' => 4]);
 
         // 4. Staff Users
         $adminUser = User::create([
@@ -160,11 +230,46 @@ class DatabaseSeeder extends Seeder
             'clearance_status' => true,
         ]);
 
-        Enrollment::create(['student_id' => $student2->id, 'subject_id' => $cs301->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.25, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
-        Enrollment::create(['student_id' => $student2->id, 'subject_id' => $cs302->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        // Enrollments & Grades for Maria Santos (BSCS 3rd Year)
+        Enrollment::create(['student_id' => $student2->id, 'subject_id' => $ccs109->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.25, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $student2->id, 'subject_id' => $ccs106->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $student2->id, 'subject_id' => $ccs112->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $student2->id, 'subject_id' => $cseg1->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.75, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $student2->id, 'subject_id' => $csp105->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.25, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $student2->id, 'subject_id' => $csp108->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $student2->id, 'subject_id' => $env101->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.75, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
 
         ClearanceRecord::create(['student_id' => $student2->id, 'department_id' => $ccs->id, 'signatory_name' => 'CCS Department Office', 'status' => 'cleared', 'cleared_at' => now()]);
         ClearanceRecord::create(['student_id' => $student2->id, 'department_id' => $library->id, 'signatory_name' => 'University Library', 'status' => 'cleared', 'cleared_at' => now()]);
+
+        // Student 2.1: Carlos Mendoza (BSCS 2nd Year)
+        $studentUserCarlos = User::create([
+            'name' => 'Carlos Mendoza',
+            'email' => 'carlos@cuyotech.edu.ph',
+            'password' => $defaultPassword,
+            'role' => 'student',
+            'status' => 'active',
+        ]);
+
+        $studentCarlos = Student::create([
+            'user_id' => $studentUserCarlos->id,
+            'course_id' => $bscs->id,
+            'student_number' => '2026-00126',
+            'year_level' => 2,
+            'clearance_status' => true,
+        ]);
+
+        Enrollment::create(['student_id' => $studentCarlos->id, 'subject_id' => $ccs104->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $studentCarlos->id, 'subject_id' => $ccs107->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.25, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $studentCarlos->id, 'subject_id' => $csp101->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.75, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $studentCarlos->id, 'subject_id' => $ent101->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $studentCarlos->id, 'subject_id' => $eth101->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.25, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $studentCarlos->id, 'subject_id' => $ped103->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.00, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $studentCarlos->id, 'subject_id' => $soc101->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.75, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+        Enrollment::create(['student_id' => $studentCarlos->id, 'subject_id' => $sts101->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
+
+        ClearanceRecord::create(['student_id' => $studentCarlos->id, 'department_id' => $ccs->id, 'signatory_name' => 'CCS Department Office', 'status' => 'cleared', 'cleared_at' => now()]);
+        ClearanceRecord::create(['student_id' => $studentCarlos->id, 'department_id' => $library->id, 'signatory_name' => 'University Library', 'status' => 'cleared', 'cleared_at' => now()]);
 
         // Student 3: Pedro Reyes (Uncleared - for testing clearance hold workflow in swimlane diagram)
         $studentUser3 = User::create([
@@ -183,7 +288,16 @@ class DatabaseSeeder extends Seeder
             'clearance_status' => false,
         ]);
 
-        ClearanceRecord::create(['student_id' => $student3->id, 'department_id' => $library->id, 'signatory_name' => 'University Library', 'status' => 'hold', 'hold_reason' => 'Unreturned borrowed textbook: Systems Analysis Principles']);
+        ClearanceRecord::create([
+            'student_id' => $student3->id,
+            'department_id' => $library->id,
+            'signatory_name' => 'University Library',
+            'status' => 'hold',
+            'hold_reason' => 'Unreturned borrowed textbook: Systems Analysis Principles',
+            'appeal_notes' => 'Returned book to Library Receiving Counter on Oct 16. Awaiting acknowledgement slip #LIB-8812.',
+            'appeal_status' => 'pending',
+            'appeal_submitted_at' => now()->subDay(),
+        ]);
         ClearanceRecord::create(['student_id' => $student3->id, 'department_id' => $ccs->id, 'signatory_name' => 'CCS Department Office', 'status' => 'hold', 'hold_reason' => 'Pending College Membership & Laboratory clearance']);
 
         // 6. Initial Document Requests matching the Swimlane & ERD
@@ -199,6 +313,7 @@ class DatabaseSeeder extends Seeder
             'requested_date' => now()->subDays(5),
             'release_date' => now()->subDay(),
         ]);
+        $req1->issueVerificationSeal();
 
         Payment::create([
             'document_request_id' => $req1->id,
@@ -251,5 +366,49 @@ class DatabaseSeeder extends Seeder
         AuditLog::record($studentUser1->id, 'Document Requested', 'Requested Transcript of Records (TOR) with tracking #TRK-2026-10001');
         AuditLog::record($cashierUser->id, 'Payment Received', 'Issued Official Receipt #OR-2026-00841 for document request');
         AuditLog::record($registrarUser->id, 'Document Released', 'Approved and marked TOR as released for Juan Dela Cruz');
+
+        // 8. In-App Notifications
+        Notification::send(
+            $studentUser1->id,
+            'Official Document Certified & Released',
+            'Your Transcript of Records (TRK-2026-10001) has been cryptographically certified and released by the Registrar.',
+            'document',
+            '/student/requests'
+        );
+        Notification::send(
+            $studentUser1->id,
+            'Official Receipt Issued',
+            'Payment of ₱150.00 verified. Official Receipt #OR-2026-00841 issued.',
+            'payment',
+            '/student/requests'
+        );
+        Notification::send(
+            $studentUser1->id,
+            'Enrollment Cleared',
+            'Your enrollment for AY 2026-2027 1st Semester has been cleared and approved.',
+            'success',
+            '/student/grades'
+        );
+        Notification::send(
+            $cashierUser->id,
+            'New Assessment Fee Pending',
+            'Document request TRK-2026-10003 by Maria Santos is pending payment assessment of ₱50.00.',
+            'payment',
+            '/cashier'
+        );
+        Notification::send(
+            $registrarUser->id,
+            'Document Request Ready for Processing',
+            'Request TRK-2026-10002 has been paid and is waiting in your processing queue.',
+            'document',
+            '/registrar'
+        );
+        Notification::send(
+            $deptUser->id,
+            'New Clearance Appeal Submitted',
+            'Student Pedro Reyes (2026-00125) submitted an appeal regarding Library textbook accountability.',
+            'clearance',
+            '/department'
+        );
     }
 }

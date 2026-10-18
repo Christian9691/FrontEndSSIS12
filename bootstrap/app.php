@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/*',
         ]);
         $middleware->append(ResolveHeaderUser::class);
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

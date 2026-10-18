@@ -16,6 +16,9 @@ class ClearanceRecord extends Model
         'signatory_name',
         'status',
         'hold_reason',
+        'appeal_notes',
+        'appeal_status',
+        'appeal_submitted_at',
         'cleared_at',
     ];
 
@@ -23,6 +26,7 @@ class ClearanceRecord extends Model
     {
         return [
             'cleared_at' => 'datetime',
+            'appeal_submitted_at' => 'datetime',
         ];
     }
 

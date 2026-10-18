@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\ClearanceRecord;
 use App\Models\Department;
+use App\Models\Notification;
 use App\Models\Student;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,6 +36,9 @@ class DepartmentController extends Controller
                         'signatory' => $r->signatory_name,
                         'status' => $r->status,
                         'hold_reason' => $r->hold_reason,
+                        'appeal_notes' => $r->appeal_notes,
+                        'appeal_status' => $r->appeal_status,
+                        'appeal_submitted_at' => $r->appeal_submitted_at?->format('M d, Y h:i A'),
                         'cleared_at' => $r->cleared_at?->format('Y-m-d H:i'),
                     ]),
                 ];
@@ -58,7 +62,14 @@ class DepartmentController extends Controller
 
         $record->status = $newStatus;
         $record->hold_reason = $newStatus === 'hold' ? $request->input('hold_reason', 'Account obligation pending') : null;
-        $record->cleared_at = $newStatus === 'cleared' ? now() : null;
+        if ($newStatus === 'cleared') {
+            $record->cleared_at = now();
+            if ($record->appeal_status === 'pending') {
+                $record->appeal_status = 'resolved';
+            }
+        } else {
+            $record->cleared_at = null;
+        }
         $record->save();
 
         // Update parent student overall clearance status
@@ -66,6 +77,27 @@ class DepartmentController extends Controller
         $activeHolds = ClearanceRecord::where('student_id', $student->id)->where('status', 'hold')->count();
         $student->clearance_status = ($activeHolds === 0);
         $student->save();
+
+        // Dispatch student notification
+        if ($student->user_id) {
+            if ($newStatus === 'cleared') {
+                Notification::send(
+                    $student->user_id,
+                    'Clearance Hold Cleared',
+                    "Your clearance hold for {$record->signatory_name} has been marked as cleared.",
+                    'clearance',
+                    '/student/clearance'
+                );
+            } else {
+                Notification::send(
+                    $student->user_id,
+                    'Clearance Hold Placed',
+                    "A clearance hold was placed by {$record->signatory_name}: {$record->hold_reason}",
+                    'warning',
+                    '/student/clearance'
+                );
+            }
+        }
 
         AuditLog::record(
             Auth::id() ?? 4,
@@ -80,6 +112,7 @@ class DepartmentController extends Controller
                 'id' => $record->id,
                 'status' => $record->status,
                 'hold_reason' => $record->hold_reason,
+                'appeal_status' => $record->appeal_status,
                 'cleared_at' => $record->cleared_at?->format('Y-m-d H:i'),
             ],
             'student_cleared' => (bool) $student->clearance_status,
@@ -108,6 +141,16 @@ class DepartmentController extends Controller
 
         $student->clearance_status = false;
         $student->save();
+
+        if ($student->user_id) {
+            Notification::send(
+                $student->user_id,
+                'Clearance Hold Placed',
+                "A clearance hold has been placed by {$record->signatory_name}: {$record->hold_reason}",
+                'warning',
+                '/student/clearance'
+            );
+        }
 
         AuditLog::record(
             Auth::id() ?? 4,

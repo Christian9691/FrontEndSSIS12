@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Models\ClearanceRecord;
 use App\Models\Course;
+use App\Models\Department;
 use App\Models\DocumentRequest;
 use App\Models\Payment;
 use App\Models\Student;
@@ -97,13 +99,35 @@ class AdminController extends Controller
             $studentNumber = $request->input('student_number') ?: '2026-'.str_pad((string) mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
             $courseId = $request->input('course_id') ?: Course::first()?->id ?? 1;
 
-            Student::create([
+            $student = Student::create([
                 'user_id' => $user->id,
                 'course_id' => $courseId,
                 'student_number' => $studentNumber,
                 'year_level' => $request->input('year_level', 1),
                 'clearance_status' => true,
             ]);
+
+            // Auto-initialize standard clearances so the student immediately appears in the Department Module
+            $ccsDept = Department::where('department_code', 'CCS')->first() ?? Department::first();
+            $libDept = Department::where('department_code', 'LIB')->first() ?? Department::skip(3)->first();
+            if ($ccsDept) {
+                ClearanceRecord::create([
+                    'student_id' => $student->id,
+                    'department_id' => $ccsDept->id,
+                    'signatory_name' => $ccsDept->department_name.' Office',
+                    'status' => 'cleared',
+                    'cleared_at' => now(),
+                ]);
+            }
+            if ($libDept) {
+                ClearanceRecord::create([
+                    'student_id' => $student->id,
+                    'department_id' => $libDept->id,
+                    'signatory_name' => 'University Library',
+                    'status' => 'cleared',
+                    'cleared_at' => now(),
+                ]);
+            }
         }
 
         AuditLog::record(

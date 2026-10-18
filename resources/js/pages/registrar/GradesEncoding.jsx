@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../api';
 import { StatusBadge } from '../../components/StatusBadge';
 import { BannerAlert } from '../../components/BannerAlert';
+import { Save } from 'lucide-react';
 
 export function GradesEncoding() {
   const [gradesSheet, setGradesSheet] = useState(null);
@@ -106,8 +107,9 @@ export function GradesEncoding() {
                   </td>
                   <td><StatusBadge status={g.remarks || 'Pending'} /></td>
                   <td>
-                    <button className="btn btn-sm" onClick={() => handleSaveGrade(g.id)}>
-                      Save Grade
+                    <button className="btn btn-sm" style={{ padding: '0.3rem 0.65rem' }} onClick={() => handleSaveGrade(g.id)}>
+                      <Save size={13} />
+                      Save
                     </button>
                   </td>
                 </tr>

@@ -2,11 +2,13 @@ import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ROLES } from './config';
+import { RotateCcw, KeyRound } from 'lucide-react';
 
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 
 import { Login } from './pages/Login';
+import { VerifyDocument } from './pages/VerifyDocument';
 
 // Student Pages
 import { StudentDashboard } from './pages/student/StudentDashboard';
@@ -39,6 +41,13 @@ function AppLayout() {
   // Redirect immediately if the current URL does not belong to the user's role
   useEffect(() => {
     if (currentUser) {
+      if (location.pathname.startsWith('/verify')) {
+        return;
+      }
+      // System administrators have full oversight across all SSIS modules
+      if (currentUser.role === 'admin') {
+        return;
+      }
       const roleConfig = ROLES[currentUser.role];
       if (roleConfig) {
         const isPathAllowed = roleConfig.routes.some(
@@ -50,6 +59,16 @@ function AppLayout() {
       }
     }
   }, [currentUser?.role, currentUser?.id, location.pathname, navigate]);
+
+  // Public verification portal is directly accessible without authentication
+  if (location.pathname.startsWith('/verify')) {
+    return (
+      <Routes>
+        <Route path="/verify/:token" element={<VerifyDocument />} />
+        <Route path="/verify" element={<VerifyDocument />} />
+      </Routes>
+    );
+  }
 
   if (loading) {
     return (
@@ -116,12 +135,63 @@ function AppLayout() {
   );
 }
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('SSIS App Error Boundary Caught:', error, errorInfo);
+  }
+
+  handleReset = () => {
+    localStorage.removeItem('ssis_user');
+    window.location.href = '/';
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-app)', padding: '2rem' }}>
+          <div className="card" style={{ maxWidth: '480px', width: '100%', textAlign: 'center', padding: '2rem' }}>
+            <div className="university-crest" style={{ margin: '0 auto 1rem' }}>CTU</div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+              System Interface Notice
+            </h2>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+              An interface error was caught. You can reload the page or reset the current portal session.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+              <button className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }} onClick={() => window.location.reload()}>
+                <RotateCcw size={14} />
+                Reload Page
+              </button>
+              <button className="btn btn-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }} onClick={this.handleReset}>
+                <KeyRound size={14} />
+                Reset Session
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export function AppRouter() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppLayout />
-      </BrowserRouter>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppLayout />
+        </BrowserRouter>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

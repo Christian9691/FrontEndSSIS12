@@ -50,43 +50,41 @@ export function AuthProvider({ children }) {
 
   const switchRole = async (targetRole) => {
     const demo = DEMO_USERS.find((u) => u.role === targetRole);
-    if (demo) {
-      const optimisticUser = {
-        id: demo.id === '2026-00123' ? 1 : demo.id === '2026-00125' ? 2 : targetRole === 'registrar' ? 3 : targetRole === 'cashier' ? 4 : targetRole === 'department' ? 5 : 6,
-        name: demo.label.split(' (')[0],
-        email: demo.id.includes('@') ? demo.id : `${demo.id}@cuyotech.edu.ph`,
+    if (!demo) return null;
+
+    try {
+      const res = await api.post('/api/auth/login', {
+        identifier: demo.id,
+        password: 'password',
         role: demo.role,
-        student: demo.role === 'student' ? {
-          id: demo.id === '2026-00123' ? 1 : 2,
-          student_number: demo.id,
-          course_code: 'BSIT',
-          course_title: 'Bachelor of Science in Information Technology',
-          year_level: 3,
-          clearance_status: demo.id === '2026-00123',
-        } : null,
-      };
-
-      // Set state and storage immediately so UI components switch on the exact frame
-      setCurrentUser(optimisticUser);
-      localStorage.setItem('ssis_user', JSON.stringify(optimisticUser));
-
-      try {
-        const res = await api.post('/api/auth/login', {
-          identifier: demo.id,
-          password: 'password',
-          role: demo.role,
-        });
-        if (res.user) {
-          setCurrentUser(res.user);
-          localStorage.setItem('ssis_user', JSON.stringify(res.user));
-          return res.user;
-        }
-      } catch (err) {
-        console.error('Role switch sync error:', err);
+      });
+      if (res && res.user) {
+        setCurrentUser(res.user);
+        localStorage.setItem('ssis_user', JSON.stringify(res.user));
+        return res.user;
       }
-      return optimisticUser;
+    } catch (err) {
+      console.error('Role switch sync error, applying fallback profile:', err);
     }
-    return null;
+
+    const fallbackUser = {
+      id: demo.userId || 1,
+      name: demo.label.split(' (')[0],
+      email: demo.id,
+      role: demo.role,
+      student: demo.role === 'student' ? {
+        id: demo.userId === 5 ? 1 : (demo.userId === 6 ? 2 : (demo.userId === 7 ? 3 : 4)),
+        student_number: demo.studentNumber || '2026-00123',
+        course_code: demo.id.includes('maria') || demo.id.includes('carlos') ? 'BSCS' : (demo.id.includes('pedro') ? 'BSIS' : 'BSIT'),
+        course_title: demo.id.includes('maria') || demo.id.includes('carlos') ? 'Bachelor of Science in Computer Science' : 'Bachelor of Science in Information Technology',
+        year_level: demo.userId === 6 ? 3 : (demo.userId === 7 ? 2 : (demo.userId === 8 ? 1 : 2)),
+        clearance_status: demo.userId !== 8,
+      } : null,
+    };
+
+    setCurrentUser(fallbackUser);
+    localStorage.setItem('ssis_user', JSON.stringify(fallbackUser));
+    return fallbackUser;
   };
 
   return (

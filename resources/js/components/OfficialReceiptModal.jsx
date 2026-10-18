@@ -1,4 +1,5 @@
 import React from 'react';
+import { Printer, Receipt } from 'lucide-react';
 
 export function OfficialReceiptModal({ doc, onClose }) {
   if (!doc) return null;
@@ -8,7 +9,10 @@ export function OfficialReceiptModal({ doc, onClose }) {
     <div className="modal-overlay">
       <div className="modal-content" style={{ maxWidth: '540px' }}>
         <div className="modal-header">
-          <h3>Official University Receipt</h3>
+          <h3 style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Receipt size={18} color="var(--primary)" />
+            Official University Receipt
+          </h3>
           <button className="modal-close-btn" onClick={onClose}>×</button>
         </div>
 
@@ -50,7 +54,10 @@ export function OfficialReceiptModal({ doc, onClose }) {
 
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose}>Close</button>
-          <button className="btn btn-accent" onClick={() => window.print()}>Print Receipt</button>
+          <button className="btn btn-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }} onClick={() => window.print()}>
+            <Printer size={14} />
+            Print Receipt
+          </button>
         </div>
       </div>
     </div>

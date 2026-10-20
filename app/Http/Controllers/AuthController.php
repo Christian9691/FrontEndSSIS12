@@ -71,7 +71,8 @@ class AuthController extends Controller
         }
 
         // Validate password against hashed database password
-        if ($request->filled('password') && ! Hash::check($password, $user->password) && $password !== 'password') {
+        $password = (string) $request->input('password', '');
+        if (empty($password) || ! Hash::check($password, $user->password)) {
             RateLimiter::hit($throttleKey, 900);
 
             return response()->json([
@@ -92,6 +93,50 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Signed in successfully.',
             'user' => $this->formatUserData($user),
+        ]);
+    }
+
+    public function changePassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated session. Please sign in.',
+            ], 401);
+        }
+
+        if (! Hash::check($request->input('current_password'), $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current password is incorrect.',
+            ], 422);
+        }
+
+        if (Hash::check($request->input('new_password'), $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'New password cannot be the same as your current password.',
+            ], 422);
+        }
+
+        $user->password = Hash::make($request->input('new_password'));
+        $user->save();
+
+        AuditLog::record(
+            $user->id,
+            'Password Changed',
+            "User {$user->name} ({$user->email}) successfully updated their account password"
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your password has been changed successfully.',
         ]);
     }
 

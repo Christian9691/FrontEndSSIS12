@@ -16,6 +16,7 @@ Route::prefix('api/auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
 });
 
 // Student Portal Endpoints
@@ -75,6 +76,7 @@ Route::prefix('api/admin')->middleware('role:admin')->group(function () {
     Route::get('/audit-logs', [AdminController::class, 'getAuditLogs']);
     Route::get('/users', [AdminController::class, 'getUsers']);
     Route::post('/users', [AdminController::class, 'createUser']);
+    Route::put('/users/{id}', [AdminController::class, 'updateUser']);
     Route::patch('/users/{id}/status', [AdminController::class, 'toggleStatus']);
 });
 

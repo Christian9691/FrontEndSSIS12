@@ -15,6 +15,9 @@ import {
   Building2,
   Shield,
   RotateCcw,
+  Edit3,
+  Lock,
+  ShieldAlert,
 } from 'lucide-react';
 
 export function UserAccounts() {
@@ -37,6 +40,49 @@ export function UserAccounts() {
   const [nextStudentNumber, setNextStudentNumber] = useState('');
   const [newCourseId, setNewCourseId] = useState(1);
   const [newYearLevel, setNewYearLevel] = useState(1);
+
+  // Edit User Form State (Admin can modify records, but CANNOT touch passwords)
+  const [editModal, setEditModal] = useState(false);
+  const [editUserId, setEditUserId] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editRole, setEditRole] = useState('student');
+  const [editStatus, setEditStatus] = useState('active');
+  const [editCourseId, setEditCourseId] = useState(1);
+  const [editYearLevel, setEditYearLevel] = useState(1);
+  const [editStudentNumber, setEditStudentNumber] = useState('');
+
+  const openEditModal = (user) => {
+    setEditUserId(user.id);
+    setEditName(user.name || '');
+    setEditEmail(user.email || '');
+    setEditRole(user.role || 'student');
+    setEditStatus(user.status || 'active');
+    setEditCourseId(user.course_id || (courses[0]?.id ?? 1));
+    setEditYearLevel(user.year_level || 1);
+    setEditStudentNumber(user.student_number || '');
+    setEditModal(true);
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api.put(`/api/admin/users/${editUserId}`, {
+        name: editName,
+        email: editEmail,
+        role: editRole,
+        status: editStatus,
+        course_id: editRole === 'student' ? editCourseId : undefined,
+        year_level: editRole === 'student' ? editYearLevel : undefined,
+      });
+
+      setMsg({ type: 'success', text: res.message });
+      setEditModal(false);
+      loadUsers();
+    } catch (err) {
+      setMsg({ type: 'danger', text: err.message || 'Failed to update user information.' });
+    }
+  };
 
   const loadUsers = () => {
     api.get('/api/admin/users')
@@ -310,21 +356,32 @@ export function UserAccounts() {
                     <td>{u.student_number ? `${u.student_number} (${u.course || 'BSIT'})` : '—'}</td>
                     <td><StatusBadge status={u.status} /></td>
                     <td style={{ textAlign: 'right' }}>
-                      <button
-                        className={`btn btn-sm ${u.status === 'active' ? 'btn-secondary' : 'btn-accent'}`}
-                        onClick={() => handleToggleStatus(u.id, u.status)}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }}
-                      >
-                        {u.status === 'active' ? (
-                          <>
-                            <UserX size={13} /> Deactivate
-                          </>
-                        ) : (
-                          <>
-                            <UserCheck size={13} /> Activate
-                          </>
-                        )}
-                      </button>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.35rem' }}>
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => openEditModal(u)}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', whiteSpace: 'nowrap', fontSize: '0.78rem' }}
+                          title="Modify user institutional information"
+                        >
+                          <Edit3 size={13} />
+                          <span>Edit Info</span>
+                        </button>
+                        <button
+                          className={`btn btn-sm ${u.status === 'active' ? 'btn-secondary' : 'btn-accent'}`}
+                          onClick={() => handleToggleStatus(u.id, u.status)}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', whiteSpace: 'nowrap', fontSize: '0.78rem' }}
+                        >
+                          {u.status === 'active' ? (
+                            <>
+                              <UserX size={13} /> Deactivate
+                            </>
+                          ) : (
+                            <>
+                              <UserCheck size={13} /> Activate
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -426,6 +483,115 @@ export function UserAccounts() {
                 <button type="submit" className="btn btn-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
                   <UserPlus size={15} />
                   <span>Create Account</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT USER INFORMATION MODAL (ADMIN ONLY - PASSWORDS EXCLUDED) */}
+      {editModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', margin: 0 }}>
+                <Edit3 size={18} color="var(--primary)" />
+                Modify User Records (#{editUserId})
+              </h3>
+              <button className="modal-close-btn" onClick={() => setEditModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleUpdateUser}>
+              <div className="modal-body">
+                {/* Security Policy Alert */}
+                <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', padding: '0.75rem', borderRadius: 'var(--radius-sm)', marginBottom: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                  <ShieldAlert size={18} color="var(--primary)" style={{ flexShrink: 0, marginTop: '0.1rem' }} />
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                    <strong>Privacy & Access Policy:</strong> Administrators can modify institutional names, institutional email, assigned system roles, and academic standing. User account passwords remain private and can only be altered by the account owner.
+                  </div>
+                </div>
+
+                <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                  <label>Institutional Email</label>
+                  <input
+                    type="email"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                  <label>System Role</label>
+                  <select value={editRole} onChange={(e) => setEditRole(e.target.value)}>
+                    <option value="student">Student Portal</option>
+                    <option value="registrar">Registrar Module</option>
+                    <option value="cashier">Cashier Module</option>
+                    <option value="department">Department Module</option>
+                    <option value="admin">Administrator Module</option>
+                  </select>
+                </div>
+
+                <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                  <label>Account Status</label>
+                  <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+
+                {editRole === 'student' && (
+                  <>
+                    {editStudentNumber && (
+                      <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                        <label>Student Number (Read-only)</label>
+                        <input
+                          type="text"
+                          value={editStudentNumber}
+                          readOnly
+                          disabled
+                          style={{ backgroundColor: 'var(--bg-card-subtle)', cursor: 'not-allowed', color: 'var(--text-main)', fontWeight: 600 }}
+                        />
+                      </div>
+                    )}
+
+                    <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                      <label>Degree Program / Course</label>
+                      <select value={editCourseId} onChange={(e) => setEditCourseId(parseInt(e.target.value) || 1)}>
+                        {courses.map((c) => (
+                          <option key={c.id} value={c.id}>{c.course_code} - {c.course_title}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                      <label>Year Level</label>
+                      <select value={editYearLevel} onChange={(e) => setEditYearLevel(parseInt(e.target.value) || 1)}>
+                        <option value={1}>1st Year</option>
+                        <option value={2}>2nd Year</option>
+                        <option value={3}>3rd Year</option>
+                        <option value={4}>4th Year</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setEditModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Edit3 size={14} />
+                  <span>Save Record Changes</span>
                 </button>
               </div>
             </form>

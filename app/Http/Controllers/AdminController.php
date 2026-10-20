@@ -131,6 +131,8 @@ class AdminController extends Controller
                 'status' => $u->status,
                 'student_number' => $u->student->student_number ?? null,
                 'course' => $u->student->course->course_code ?? null,
+                'course_id' => $u->student->course_id ?? null,
+                'year_level' => $u->student->year_level ?? null,
                 'created_at' => $u->created_at->format('Y-m-d'),
             ];
         });
@@ -245,6 +247,54 @@ class AdminController extends Controller
             'success' => true,
             'message' => "Account {$user->name} is now {$newStatus}.",
             'status' => $user->status,
+        ]);
+    }
+
+    /**
+     * Admin update user institutional information (name, email, role, status, student course/year).
+     * SECURITY POLICY: Administrator CANNOT modify user passwords. Passwords can only be changed by the account owner.
+     */
+    public function updateUser(Request $request, int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'email' => "required|email|unique:users,email,{$id}",
+            'role' => 'required|in:student,registrar,cashier,admin,department',
+            'course_id' => 'nullable|exists:courses,id',
+            'year_level' => 'nullable|integer|min:1|max:5',
+            'status' => 'nullable|in:active,inactive,suspended',
+        ]);
+
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        $user->role = $request->input('role');
+        if ($request->filled('status')) {
+            $user->status = $request->input('status');
+        }
+        $user->save();
+
+        if ($user->role === 'student' && $user->student) {
+            if ($request->filled('course_id')) {
+                $user->student->course_id = (int) $request->input('course_id');
+            }
+            if ($request->filled('year_level')) {
+                $user->student->year_level = (int) $request->input('year_level');
+            }
+            $user->student->save();
+        }
+
+        AuditLog::record(
+            Auth::id() ?? 1,
+            'User Information Updated',
+            "Admin updated user information for {$user->name} (Role: {$user->role})"
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => "Institutional records for {$user->name} updated successfully.",
+            'user' => $user->load('student.course'),
         ]);
     }
 }

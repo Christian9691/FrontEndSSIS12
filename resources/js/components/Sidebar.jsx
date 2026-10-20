@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ROLES } from '../config';
+import { ChangePasswordModal } from './ChangePasswordModal';
 import {
   LayoutDashboard,
   GraduationCap,
@@ -16,10 +17,12 @@ import {
   Building2,
   LogOut,
   FolderOpen,
+  KeyRound,
 } from 'lucide-react';
 
 export function Sidebar() {
   const { currentUser, logout } = useAuth();
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const roleConfig = ROLES[currentUser?.role] || ROLES.student;
 
   const getRouteIcon = (path) => {
@@ -106,12 +109,39 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="sidebar-footer">
+      <div className="sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+        <button
+          type="button"
+          className="btn btn-sm"
+          onClick={() => setShowPasswordModal(true)}
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.45rem',
+            fontSize: '0.78rem',
+            padding: '0.42rem 0.5rem',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            color: '#ffffff',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: 'var(--radius-sm)',
+            cursor: 'pointer',
+            transition: 'background-color 0.15s ease',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.18)')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)')}
+        >
+          <KeyRound size={14} />
+          <span>Change Password</span>
+        </button>
         <button className="signout-btn" onClick={logout} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem' }}>
           <LogOut size={16} />
           <span>Sign Out</span>
         </button>
       </div>
+
+      <ChangePasswordModal isOpen={showPasswordModal} onClose={() => setShowPasswordModal(false)} />
     </aside>
   );
 }

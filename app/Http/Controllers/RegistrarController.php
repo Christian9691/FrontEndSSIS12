@@ -131,8 +131,8 @@ class RegistrarController extends Controller
 
     public function getGradesSheet(Request $request): JsonResponse
     {
-        $subjects = Subject::with(['course'])->get();
-        $selectedSubjectId = $request->query('subject_id', $subjects->first()?->id);
+        $subjectsCollection = Subject::with(['course'])->orderBy('subject_code')->get();
+        $selectedSubjectId = $request->query('subject_id', $subjectsCollection->first()?->id);
 
         $enrollments = Enrollment::with(['student.user', 'student.course', 'subject'])
             ->when($selectedSubjectId, fn ($q) => $q->where('subject_id', $selectedSubjectId))
@@ -153,8 +153,25 @@ class RegistrarController extends Controller
                 ];
             });
 
+        $subjects = $subjectsCollection->map(function ($s) {
+            return [
+                'id' => $s->id,
+                'course_id' => $s->course_id,
+                'course_code' => $s->course->course_code ?? 'GEN',
+                'course_title' => $s->course->course_title ?? 'General',
+                'subject_code' => $s->subject_code,
+                'subject_title' => $s->subject_title,
+                'units' => $s->units,
+                'semester' => $s->semester,
+                'year_level' => $s->year_level,
+            ];
+        });
+
+        $programs = Course::orderBy('course_code')->get(['id', 'course_code', 'course_title']);
+
         return response()->json([
             'subjects' => $subjects,
+            'programs' => $programs,
             'selected_subject_id' => (int) $selectedSubjectId,
             'grades' => $enrollments,
         ]);

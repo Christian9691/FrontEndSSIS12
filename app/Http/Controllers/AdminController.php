@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
-    public function dashboard(): JsonResponse
+    public function dashboard(Request $request): JsonResponse
     {
         $totalUsers = User::count();
         $totalStudents = Student::count();
@@ -26,18 +26,31 @@ class AdminController extends Controller
         $totalCollections = Payment::where('payment_status', 'verified')->sum('amount_paid');
         $clearedStudents = Student::where('clearance_status', true)->count();
 
-        $recentLogs = AuditLog::with('user')
-            ->orderBy('created_at', 'desc')
-            ->take(50)
-            ->get()
-            ->map(fn ($l) => [
-                'id' => $l->id,
-                'user_name' => $l->user->name ?? 'System',
-                'action' => $l->action,
-                'details' => $l->details,
-                'ip_address' => $l->ip_address,
-                'created_at' => $l->created_at->format('M d, Y h:i A'),
-            ]);
+        $limit = $request->query('limit', 50);
+        $sort = strtolower($request->query('sort', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $date = $request->query('date');
+
+        $query = AuditLog::with('user');
+
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        }
+
+        $query->orderBy('created_at', $sort);
+
+        if ($limit !== 'all' && (int) $limit > 0) {
+            $query->take((int) $limit);
+        }
+
+        $recentLogs = $query->get()->map(fn ($l) => [
+            'id' => $l->id,
+            'user_name' => $l->user->name ?? 'System',
+            'action' => $l->action,
+            'details' => $l->details,
+            'ip_address' => $l->ip_address,
+            'created_at' => $l->created_at->format('M d, Y h:i A'),
+            'raw_date' => $l->created_at->toDateString(),
+        ]);
 
         return response()->json([
             'metrics' => [
@@ -49,6 +62,61 @@ class AdminController extends Controller
                 'clearance_rate' => $totalStudents > 0 ? round(($clearedStudents / $totalStudents) * 100, 1) : 100,
             ],
             'audit_logs' => $recentLogs,
+        ]);
+    }
+
+    public function getAuditLogs(Request $request): JsonResponse
+    {
+        $limit = $request->query('limit', 50);
+        $sort = strtolower($request->query('sort', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $date = $request->query('date');
+        $datePreset = $request->query('date_preset');
+        $search = $request->query('search');
+
+        $query = AuditLog::with('user');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('action', 'like', "%{$search}%")
+                    ->orWhere('details', 'like', "%{$search}%")
+                    ->orWhere('ip_address', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        } elseif ($datePreset) {
+            match ($datePreset) {
+                'today' => $query->whereDate('created_at', now()->today()),
+                'yesterday' => $query->whereDate('created_at', now()->yesterday()),
+                'this_week' => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+                'this_month' => $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
+                default => null,
+            };
+        }
+
+        $totalCount = (clone $query)->count();
+
+        $query->orderBy('created_at', $sort);
+
+        if ($limit !== 'all' && (int) $limit > 0) {
+            $query->take((int) $limit);
+        }
+
+        $logs = $query->get()->map(fn ($l) => [
+            'id' => $l->id,
+            'user_name' => $l->user->name ?? 'System',
+            'action' => $l->action,
+            'details' => $l->details,
+            'ip_address' => $l->ip_address,
+            'created_at' => $l->created_at->format('M d, Y h:i A'),
+            'raw_date' => $l->created_at->toDateString(),
+        ]);
+
+        return response()->json([
+            'audit_logs' => $logs,
+            'total_count' => $totalCount,
         ]);
     }
 

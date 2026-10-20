@@ -71,6 +71,7 @@ Route::prefix('api/department')->middleware('role:department,admin')->group(func
 // Admin Module Endpoints
 Route::prefix('api/admin')->middleware('role:admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard']);
+    Route::get('/audit-logs', [AdminController::class, 'getAuditLogs']);
     Route::get('/users', [AdminController::class, 'getUsers']);
     Route::post('/users', [AdminController::class, 'createUser']);
     Route::patch('/users/{id}/status', [AdminController::class, 'toggleStatus']);

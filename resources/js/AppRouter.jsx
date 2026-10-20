@@ -33,10 +33,22 @@ import { SystemOverview } from './pages/admin/SystemOverview';
 import { UserAccounts } from './pages/admin/UserAccounts';
 import { AuditLogs } from './pages/admin/AuditLogs';
 
+import { UnauthorizedPage } from './pages/UnauthorizedPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { MustChangePasswordModal } from './components/MustChangePasswordModal';
+
+function RoleRoute({ allowedRoles, children }) {
+  const { currentUser } = useAuth();
+  if (!currentUser) return <Navigate to="/" replace />;
+  if (currentUser.role === 'admin' || allowedRoles.includes(currentUser.role)) {
+    return children;
+  }
+  return <UnauthorizedPage />;
+}
+
 function AppLayout() {
   const { currentUser, loading } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
     try {
@@ -55,28 +67,6 @@ function AppLayout() {
       return next;
     });
   };
-
-  // Redirect immediately if the current URL does not belong to the user's role
-  useEffect(() => {
-    if (currentUser) {
-      if (location.pathname.startsWith('/verify')) {
-        return;
-      }
-      // System administrators have full oversight across all SSIS modules
-      if (currentUser.role === 'admin') {
-        return;
-      }
-      const roleConfig = ROLES[currentUser.role];
-      if (roleConfig) {
-        const isPathAllowed = roleConfig.routes.some(
-          (r) => location.pathname === r.path || location.pathname.startsWith(r.path + '/')
-        );
-        if (!isPathAllowed) {
-          navigate(roleConfig.basePath, { replace: true });
-        }
-      }
-    }
-  }, [currentUser?.role, currentUser?.id, location.pathname, navigate]);
 
   // Public verification portal is directly accessible without authentication
   if (location.pathname.startsWith('/verify')) {
@@ -108,7 +98,7 @@ function AppLayout() {
   const roleConfig = ROLES[currentUser.role] || ROLES.student;
 
   // Derive active page title from current route
-  const currentRoute = roleConfig.routes.find((r) => r.path === location.pathname);
+  const currentRoute = roleConfig.routes?.find((r) => r.path === location.pathname);
   const pageTitle = currentRoute ? currentRoute.label : roleConfig.label;
 
   return (
@@ -125,34 +115,40 @@ function AppLayout() {
         <div className="content-container">
           <Routes>
             {/* Student Portal Routes */}
-            <Route path="/student" element={<StudentDashboard />} />
-            <Route path="/student/grades" element={<GradesAndSubjects />} />
-            <Route path="/student/clearance" element={<ClearanceStatus />} />
-            <Route path="/student/requests" element={<DocumentRequests />} />
+            <Route path="/student" element={<RoleRoute allowedRoles={['student']}><StudentDashboard /></RoleRoute>} />
+            <Route path="/student/grades" element={<RoleRoute allowedRoles={['student']}><GradesAndSubjects /></RoleRoute>} />
+            <Route path="/student/clearance" element={<RoleRoute allowedRoles={['student']}><ClearanceStatus /></RoleRoute>} />
+            <Route path="/student/requests" element={<RoleRoute allowedRoles={['student']}><DocumentRequests /></RoleRoute>} />
 
             {/* Registrar Module Routes */}
-            <Route path="/registrar" element={<DocumentQueue />} />
-            <Route path="/registrar/grades" element={<GradesEncoding />} />
-            <Route path="/registrar/enrollment" element={<Enrollment />} />
+            <Route path="/registrar" element={<RoleRoute allowedRoles={['registrar']}><DocumentQueue /></RoleRoute>} />
+            <Route path="/registrar/grades" element={<RoleRoute allowedRoles={['registrar']}><GradesEncoding /></RoleRoute>} />
+            <Route path="/registrar/enrollment" element={<RoleRoute allowedRoles={['registrar']}><Enrollment /></RoleRoute>} />
 
             {/* Cashier Module Routes */}
-            <Route path="/cashier" element={<PaymentQueue />} />
-            <Route path="/cashier/ledger" element={<ReceiptsLedger />} />
+            <Route path="/cashier" element={<RoleRoute allowedRoles={['cashier']}><PaymentQueue /></RoleRoute>} />
+            <Route path="/cashier/ledger" element={<RoleRoute allowedRoles={['cashier']}><ReceiptsLedger /></RoleRoute>} />
 
             {/* Department Module Routes */}
-            <Route path="/department" element={<ClearanceProcessing />} />
+            <Route path="/department" element={<RoleRoute allowedRoles={['department']}><ClearanceProcessing /></RoleRoute>} />
 
             {/* Admin Module Routes */}
-            <Route path="/admin" element={<SystemOverview />} />
-            <Route path="/admin/users" element={<UserAccounts />} />
-            <Route path="/admin/audit" element={<AuditLogs />} />
+            <Route path="/admin" element={<RoleRoute allowedRoles={['admin']}><SystemOverview /></RoleRoute>} />
+            <Route path="/admin/users" element={<RoleRoute allowedRoles={['admin']}><UserAccounts /></RoleRoute>} />
+            <Route path="/admin/audit" element={<RoleRoute allowedRoles={['admin']}><AuditLogs /></RoleRoute>} />
+
+            {/* Security Access Routes */}
+            <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
             {/* Root & Fallback Redirects */}
             <Route path="/" element={<Navigate to={roleConfig.basePath} replace />} />
-            <Route path="*" element={<Navigate to={roleConfig.basePath} replace />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
       </main>
+
+      {/* Mandatory First-Time Login Password Change Guard */}
+      <MustChangePasswordModal isOpen={Boolean(currentUser?.must_change_password)} />
     </div>
   );
 }

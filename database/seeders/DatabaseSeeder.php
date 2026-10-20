@@ -300,33 +300,37 @@ class DatabaseSeeder extends Seeder
         $adminUser = User::create([
             'name' => 'System Administrator',
             'email' => 'admin@cuyotech.edu.ph',
-            'password' => $defaultPassword,
+            'password' => Hash::make('CuyoTech2026!'),
             'role' => 'admin',
             'status' => 'active',
+            'must_change_password' => true,
         ]);
 
         $registrarUser = User::create([
             'name' => 'Dr. Elena Ramos (Registrar)',
             'email' => 'registrar@cuyotech.edu.ph',
-            'password' => $defaultPassword,
+            'password' => Hash::make('CuyoTech2026!'),
             'role' => 'registrar',
             'status' => 'active',
+            'must_change_password' => true,
         ]);
 
         $cashierUser = User::create([
             'name' => 'Ben Cruz (Cashier Officer)',
             'email' => 'cashier@cuyotech.edu.ph',
-            'password' => $defaultPassword,
+            'password' => Hash::make('CuyoTech2026!'),
             'role' => 'cashier',
             'status' => 'active',
+            'must_change_password' => true,
         ]);
 
         $deptUser = User::create([
             'name' => 'Prof. Rolando Diaz (CCS Dept Head)',
             'email' => 'department@cuyotech.edu.ph',
-            'password' => $defaultPassword,
+            'password' => Hash::make('CuyoTech2026!'),
             'role' => 'department',
             'status' => 'active',
+            'must_change_password' => true,
         ]);
 
         // 5. Student Users & Profiles
@@ -334,9 +338,10 @@ class DatabaseSeeder extends Seeder
         $studentUser1 = User::create([
             'name' => 'Juan Dela Cruz',
             'email' => 'student@cuyotech.edu.ph',
-            'password' => $defaultPassword,
+            'password' => Hash::make('2026-00123'),
             'role' => 'student',
             'status' => 'active',
+            'must_change_password' => true,
         ]);
 
         $student1 = Student::create([
@@ -363,9 +368,10 @@ class DatabaseSeeder extends Seeder
         $studentUser2 = User::create([
             'name' => 'Maria Santos',
             'email' => 'maria@cuyotech.edu.ph',
-            'password' => $defaultPassword,
+            'password' => Hash::make('2026-00124'),
             'role' => 'student',
             'status' => 'active',
+            'must_change_password' => true,
         ]);
 
         $student2 = Student::create([
@@ -393,9 +399,10 @@ class DatabaseSeeder extends Seeder
         $studentUserCarlos = User::create([
             'name' => 'Carlos Mendoza',
             'email' => 'carlos@cuyotech.edu.ph',
-            'password' => $defaultPassword,
+            'password' => Hash::make('2026-00126'),
             'role' => 'student',
             'status' => 'active',
+            'must_change_password' => true,
         ]);
 
         $studentCarlos = Student::create([
@@ -423,9 +430,10 @@ class DatabaseSeeder extends Seeder
         $studentUser3 = User::create([
             'name' => 'Pedro Reyes',
             'email' => 'pedro@cuyotech.edu.ph',
-            'password' => $defaultPassword,
+            'password' => Hash::make('2026-00125'),
             'role' => 'student',
             'status' => 'active',
+            'must_change_password' => true,
         ]);
 
         $student3 = Student::create([

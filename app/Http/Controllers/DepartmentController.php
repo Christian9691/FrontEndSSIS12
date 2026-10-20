@@ -68,13 +68,15 @@ class DepartmentController extends Controller
 
         $studentNumber = Student::generateNextStudentNumber();
         $yearLevel = (int) $request->input('year_level', 1);
+        $initialPassword = $request->input('password') ?: $studentNumber;
 
         $user = User::create([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password', 'password')),
+            'password' => Hash::make($initialPassword),
             'role' => 'student',
             'status' => 'active',
+            'must_change_password' => true,
         ]);
 
         $student = Student::create([
@@ -120,8 +122,9 @@ class DepartmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "Student {$user->name} enrolled successfully with Student ID {$studentNumber}.",
+            'message' => "Student {$user->name} enrolled successfully with Student ID {$studentNumber}. Initial password: {$initialPassword} (forced change on first sign-in).",
             'student' => $student->load(['user', 'course']),
+            'initial_password' => $initialPassword,
         ], 201);
     }
 

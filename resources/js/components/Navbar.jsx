@@ -1,32 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ROLES } from '../config';
 import { NotificationDropdown } from './NotificationDropdown';
-import { Menu } from 'lucide-react';
+import { Menu, ShieldCheck } from 'lucide-react';
 
 export function Navbar({ title, collapsed, onToggleSidebar }) {
-  const { currentUser, switchRole } = useAuth();
-  const navigate = useNavigate();
-  const [switching, setSwitching] = useState(false);
-
-  const handleRoleChange = async (e) => {
-    const targetRole = e.target.value;
-    if (targetRole === currentUser?.role) return;
-    setSwitching(true);
-    try {
-      const user = await switchRole(targetRole);
-      const destination = (user && ROLES[user.role]) ? ROLES[user.role].basePath : ROLES[targetRole]?.basePath;
-      if (destination) {
-        navigate(destination);
-      }
-    } catch (err) {
-      console.error('Portal switch error:', err);
-    } finally {
-      setSwitching(false);
-    }
-  };
-
+  const { currentUser } = useAuth();
   const roleConfig = ROLES[currentUser?.role] || ROLES.student;
 
   return (
@@ -67,16 +46,24 @@ export function Navbar({ title, collapsed, onToggleSidebar }) {
         {/* Real-Time In-App Notification Center */}
         <NotificationDropdown />
 
-        {/* Quick Demo Role Switcher */}
-        <div className="role-switcher-dropdown">
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            {switching ? 'Switching...' : 'Portal:'}
-          </span>
-          <select value={currentUser?.role || 'student'} onChange={handleRoleChange} disabled={switching}>
-            {Object.entries(ROLES).map(([key, r]) => (
-              <option key={key} value={key}>{r.label}</option>
-            ))}
-          </select>
+        {/* Authenticated Identity Pill */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.3rem 0.65rem',
+            background: 'rgba(10, 46, 27, 0.05)',
+            border: '1px solid var(--border)',
+            borderRadius: '9999px',
+            fontSize: '0.76rem',
+            fontWeight: 600,
+            color: 'var(--primary-dark)',
+          }}
+          title={`Authenticated as ${currentUser?.name} (${roleConfig.label})`}
+        >
+          <ShieldCheck size={14} color="var(--primary)" />
+          <span>{roleConfig.label}</span>
         </div>
       </div>
     </header>

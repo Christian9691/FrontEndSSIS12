@@ -158,19 +158,26 @@ class AdminController extends Controller
             'year_level' => 'nullable|integer|min:1|max:5',
         ]);
 
-        $user = User::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password', 'password')),
-            'role' => $request->input('role'),
-            'status' => 'active',
-        ]);
-
-        if ($user->role === 'student') {
+        if ($request->input('role') === 'student') {
             $rawStudentNum = $request->input('student_number');
             $studentNumber = (! empty($rawStudentNum) && $rawStudentNum !== 'auto')
                 ? $rawStudentNum
                 : Student::generateNextStudentNumber();
+            $initialPassword = $request->input('password') ?: $studentNumber;
+        } else {
+            $initialPassword = $request->input('password') ?: 'CuyoTech2026!';
+        }
+
+        $user = User::create([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($initialPassword),
+            'role' => $request->input('role'),
+            'status' => 'active',
+            'must_change_password' => true,
+        ]);
+
+        if ($user->role === 'student') {
             $courseId = $request->input('course_id') ?: Course::first()?->id ?? 1;
             $yearLevel = (int) $request->input('year_level', 1);
 
@@ -218,9 +225,10 @@ class AdminController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "User account for {$user->name} created successfully.",
+            'message' => "User account for {$user->name} created successfully. Initial temporary password: {$initialPassword} (forced change on first sign-in).",
             'user' => $user->load('student.course'),
             'student' => $student ?? null,
+            'initial_password' => $initialPassword,
             'next_student_number' => Student::generateNextStudentNumber(),
         ], 201);
     }

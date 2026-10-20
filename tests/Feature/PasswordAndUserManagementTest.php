@@ -22,7 +22,7 @@ class PasswordAndUserManagementTest extends TestCase
     {
         $response = $this->postJson('/api/auth/login', [
             'identifier' => 'student@cuyotech.edu.ph',
-            'password' => 'password',
+            'password' => '2026-00123',
         ]);
 
         $response->assertStatus(200)
@@ -47,7 +47,7 @@ class PasswordAndUserManagementTest extends TestCase
         $studentUser = User::where('email', 'student@cuyotech.edu.ph')->first();
 
         $response = $this->actingAs($studentUser)->postJson('/api/auth/change-password', [
-            'current_password' => 'password',
+            'current_password' => '2026-00123',
             'new_password' => 'MyNewSecurePass2026!',
             'new_password_confirmation' => 'MyNewSecurePass2026!',
         ]);
@@ -58,12 +58,12 @@ class PasswordAndUserManagementTest extends TestCase
         // Verify password hash updated in database
         $studentUser->refresh();
         $this->assertTrue(Hash::check('MyNewSecurePass2026!', $studentUser->password));
-        $this->assertFalse(Hash::check('password', $studentUser->password));
+        $this->assertFalse(Hash::check('2026-00123', $studentUser->password));
 
         // Test login with old password fails
         $failLogin = $this->postJson('/api/auth/login', [
             'identifier' => 'student@cuyotech.edu.ph',
-            'password' => 'password',
+            'password' => '2026-00123',
         ]);
         $failLogin->assertStatus(401);
 
@@ -91,7 +91,7 @@ class PasswordAndUserManagementTest extends TestCase
 
         // Mismatched confirmation
         $responseMismatch = $this->actingAs($studentUser)->postJson('/api/auth/change-password', [
-            'current_password' => 'password',
+            'current_password' => '2026-00123',
             'new_password' => 'ValidNewPass123!',
             'new_password_confirmation' => 'DifferentPass456!',
         ]);
@@ -129,7 +129,7 @@ class PasswordAndUserManagementTest extends TestCase
 
         // Password MUST remain unchanged
         $this->assertSame($originalPasswordHash, $studentUser->password);
-        $this->assertTrue(Hash::check('password', $studentUser->password));
+        $this->assertTrue(Hash::check('2026-00123', $studentUser->password));
         $this->assertFalse(Hash::check('HackerOrAdminInjectedPassword!', $studentUser->password));
     }
 

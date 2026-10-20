@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ROLES } from '../config';
 import { NotificationDropdown } from './NotificationDropdown';
+import { Menu } from 'lucide-react';
 
-export function Navbar({ title }) {
+export function Navbar({ title, collapsed, onToggleSidebar }) {
   const { currentUser, switchRole } = useAuth();
   const navigate = useNavigate();
   const [switching, setSwitching] = useState(false);
@@ -31,6 +32,16 @@ export function Navbar({ title }) {
   return (
     <header className="top-navbar">
       <div className="top-nav-left">
+        <button
+          type="button"
+          className="sidebar-hamburger-btn"
+          onClick={onToggleSidebar}
+          title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          aria-label={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+        >
+          <Menu size={19} />
+        </button>
+
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-subtle)', fontWeight: 600 }}>

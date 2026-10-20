@@ -38,6 +38,24 @@ function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
+    try {
+      return localStorage.getItem('ssis_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('ssis_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
   // Redirect immediately if the current URL does not belong to the user's role
   useEffect(() => {
     if (currentUser) {
@@ -94,11 +112,15 @@ function AppLayout() {
   const pageTitle = currentRoute ? currentRoute.label : roleConfig.label;
 
   return (
-    <div className="app-shell">
-      <Sidebar />
+    <div className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
 
       <main className="app-main">
-        <Navbar title={pageTitle} />
+        <Navbar
+          title={pageTitle}
+          collapsed={sidebarCollapsed}
+          onToggleSidebar={toggleSidebar}
+        />
 
         <div className="content-container">
           <Routes>

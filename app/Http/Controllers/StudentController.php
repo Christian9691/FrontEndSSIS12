@@ -8,6 +8,7 @@ use App\Models\Notification;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\User;
+use App\Services\CurriculumService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,15 +43,9 @@ class StudentController extends Controller
 
         $student->load(['user', 'course.department', 'enrollments.subject']);
 
-        $enrollments = $student->enrollments;
+        $enrollments = $student->enrollments->where('enrollment_status', '!=', 'dropped');
         $totalUnits = $enrollments->sum(fn ($e) => $e->subject->units ?? 3);
-        $gradedEnrollments = $enrollments->whereNotNull('grade');
-        $gwa = null;
-        if ($gradedEnrollments->isNotEmpty()) {
-            $totalPoints = $gradedEnrollments->sum(fn ($e) => $e->grade * ($e->subject->units ?? 3));
-            $gradedUnits = $gradedEnrollments->sum(fn ($e) => $e->subject->units ?? 3);
-            $gwa = $gradedUnits > 0 ? round($totalPoints / $gradedUnits, 2) : null;
-        }
+        $gwa = $student->calculateGwa();
 
         $clearanceHolds = ClearanceRecord::where('student_id', $student->id)
             ->where('status', 'hold')
@@ -95,13 +90,7 @@ class StudentController extends Controller
             ->orderBy('semester', 'desc')
             ->get();
 
-        $graded = $enrollments->whereNotNull('grade');
-        $gwa = null;
-        if ($graded->isNotEmpty()) {
-            $totalPoints = $graded->sum(fn ($e) => $e->grade * ($e->subject->units ?? 3));
-            $gradedUnits = $graded->sum(fn ($e) => $e->subject->units ?? 3);
-            $gwa = $gradedUnits > 0 ? round($totalPoints / $gradedUnits, 2) : null;
-        }
+        $gwa = $student->calculateGwa();
 
         return response()->json([
             'student_name' => $student->user->name ?? '',
@@ -109,14 +98,14 @@ class StudentController extends Controller
             'course' => $student->course->course_title ?? '',
             'year_level' => $student->year_level,
             'gwa' => $gwa,
-            'academic_standing' => $gwa && $gwa <= 1.75 ? "Dean's Lister / Regular" : 'Regular Standing',
+            'academic_standing' => $student->academicStanding($gwa),
             'grades' => $enrollments->map(fn ($e) => [
                 'id' => $e->id,
                 'subject_code' => $e->subject->subject_code ?? '',
                 'subject_title' => $e->subject->subject_title ?? '',
                 'units' => $e->subject->units ?? 3,
                 'grade' => $e->grade !== null ? (float) $e->grade : null,
-                'remarks' => $e->remarks ?? ($e->grade ? ($e->grade <= 3.0 ? 'Passed' : 'Failed') : 'In Progress'),
+                'remarks' => $e->grade !== null ? Enrollment::remarksForGrade((float) $e->grade) : ($e->enrollment_status === 'dropped' ? 'Dropped' : ($e->enrollment_status === 'pending' ? 'Pending' : 'In Progress')),
                 'academic_year' => $e->academic_year,
                 'semester' => $e->semester,
             ]),
@@ -150,6 +139,56 @@ class StudentController extends Controller
             ]),
             'curriculum' => $curriculum,
         ]);
+    }
+
+    /**
+     * Program curriculum grouped by year level and semester, with per-subject status.
+     */
+    public function curriculum(Request $request, CurriculumService $curriculum): JsonResponse
+    {
+        $student = $this->resolveStudent($request);
+        if (! $student) {
+            return response()->json(['error' => 'Student record not found.'], 404);
+        }
+
+        return response()->json($curriculum->build($student));
+    }
+
+    /**
+     * Student asks to enroll in subjects; creates 'pending' enrollments for registrar approval.
+     */
+    public function requestEnrollment(Request $request, CurriculumService $curriculum): JsonResponse
+    {
+        $student = $this->resolveStudent($request);
+        if (! $student || Auth::user()?->role !== 'student') {
+            return response()->json(['success' => false, 'message' => 'Only students can submit an enrollment request.'], 403);
+        }
+
+        $data = $request->validate([
+            'subject_ids' => 'required|array|min:1',
+            'subject_ids.*' => 'integer',
+        ]);
+
+        $result = $curriculum->enroll($student, $data['subject_ids'], null, null, 'pending');
+
+        if ($result['error']) {
+            return response()->json(['success' => false, 'message' => $result['error']], 422);
+        }
+        if (empty($result['enrolled'])) {
+            return response()->json(['success' => false, 'message' => 'No subjects could be requested.', 'skipped' => $result['skipped']], 422);
+        }
+
+        $count = count($result['enrolled']);
+        $registrar = User::where('role', 'registrar')->first();
+        if ($registrar) {
+            Notification::send($registrar->id, 'Enrollment Request', "{$student->user->name} ({$student->student_number}) requested {$count} subject(s).", 'info', '/registrar/enrollment');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Enrollment request for {$count} subject(s) sent to the Registrar for approval.",
+            'skipped' => $result['skipped'],
+        ], 201);
     }
 
     public function clearance(Request $request): JsonResponse

@@ -1125,4 +1125,122 @@ tbody tr:last-child td {
     box-sizing: border-box !important;
     font-size: 0.78rem !important;
   }
+.grades-student-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8faf8;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+}
+
+.curriculum-summary {
+  background: #f8faf8;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.curriculum-progress-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.progress-track {
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary-dark);
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+.curriculum-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.curriculum-stat-label {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.curriculum-stat-value {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.curriculum-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.year-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.year-head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f1f5f1;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.year-current {
+  margin-left: 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.semester-block {
+  padding: 0.75rem 1rem 0.25rem;
+}
+
+.semester-head {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.semester-units {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.retake-note {
+  font-size: 0.75rem;
+  color: var(--warning);
+}
 }

@@ -19,10 +19,12 @@ Route::prefix('api/auth')->group(function () {
 });
 
 // Student Portal Endpoints
-Route::prefix('api/student')->group(function () {
+Route::prefix('api/student')->middleware('role:student,registrar,admin,department')->group(function () {
     Route::get('/dashboard', [StudentController::class, 'dashboard']);
     Route::get('/grades', [StudentController::class, 'grades']);
     Route::get('/subjects', [StudentController::class, 'subjects']);
+    Route::get('/curriculum', [StudentController::class, 'curriculum']);
+    Route::post('/enrollment-request', [StudentController::class, 'requestEnrollment']);
     Route::get('/clearance', [StudentController::class, 'clearance']);
     Route::post('/clearance/appeal', [StudentController::class, 'submitClearanceAppeal']);
 });
@@ -50,22 +52,24 @@ Route::prefix('api/payments')->group(function () {
 });
 
 // Registrar Module Endpoints
-Route::prefix('api/registrar')->group(function () {
+Route::prefix('api/registrar')->middleware('role:registrar,admin')->group(function () {
     Route::get('/enrollments', [RegistrarController::class, 'getEnrollments']);
     Route::post('/enrollments/{studentId}/approve', [RegistrarController::class, 'approveEnrollment']);
+    Route::post('/students/{studentId}/enroll', [RegistrarController::class, 'enrollStudent']);
+    Route::patch('/enrollments/{enrollmentId}/drop', [RegistrarController::class, 'dropEnrollment']);
     Route::get('/grades', [RegistrarController::class, 'getGradesSheet']);
     Route::post('/grades', [RegistrarController::class, 'saveGrade']);
 });
 
 // Department Module Endpoints
-Route::prefix('api/department')->group(function () {
+Route::prefix('api/department')->middleware('role:department,admin')->group(function () {
     Route::get('/clearances', [DepartmentController::class, 'index']);
     Route::patch('/clearances/{id}', [DepartmentController::class, 'updateClearance']);
     Route::post('/clearances/hold', [DepartmentController::class, 'addClearanceHold']);
 });
 
 // Admin Module Endpoints
-Route::prefix('api/admin')->group(function () {
+Route::prefix('api/admin')->middleware('role:admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard']);
     Route::get('/users', [AdminController::class, 'getUsers']);
     Route::post('/users', [AdminController::class, 'createUser']);

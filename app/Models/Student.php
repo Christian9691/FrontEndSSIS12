@@ -53,6 +53,36 @@ class Student extends Model
     }
 
     /**
+     * Units-weighted average of all graded, non-dropped enrollments (null if none graded yet).
+     */
+    public function calculateGwa(): ?float
+    {
+        $graded = $this->enrollments()->with('subject')
+            ->whereNotNull('grade')->where('enrollment_status', '!=', 'dropped')->get();
+
+        $units = $graded->sum(fn ($e) => $e->subject->units ?? 3);
+        if ($units <= 0) {
+            return null;
+        }
+
+        return round($graded->sum(fn ($e) => $e->grade * ($e->subject->units ?? 3)) / $units, 2);
+    }
+
+    /**
+     * Dean's Lister: GWA of 1.75 or better with no grade worse than 2.50.
+     */
+    public function academicStanding(?float $gwa = null): string
+    {
+        $gwa ??= $this->calculateGwa();
+        if ($gwa === null) {
+            return 'No Grades Yet';
+        }
+        $worst = (float) $this->enrollments()->whereNotNull('grade')->max('grade');
+
+        return ($gwa <= 1.75 && $worst <= 2.50) ? "Dean's Lister" : 'Regular Standing';
+    }
+
+    /**
      * Check if student is cleared across all departments.
      */
     public function isFullyCleared(): bool

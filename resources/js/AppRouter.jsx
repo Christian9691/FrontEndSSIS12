@@ -40,7 +40,7 @@ import { MustChangePasswordModal } from './components/MustChangePasswordModal';
 function RoleRoute({ allowedRoles, children }) {
   const { currentUser } = useAuth();
   if (!currentUser) return <Navigate to="/" replace />;
-  if (currentUser.role === 'admin' || allowedRoles.includes(currentUser.role)) {
+  if (allowedRoles.includes(currentUser.role)) {
     return children;
   }
   return <UnauthorizedPage />;

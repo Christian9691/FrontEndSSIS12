@@ -142,7 +142,7 @@ export function MustChangePasswordModal({ isOpen }) {
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter current password (e.g. Student Number or CuyoTech2026!)"
+                placeholder="Enter current password"
                 required
                 style={{ fontSize: '0.85rem' }}
               />

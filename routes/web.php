@@ -20,7 +20,7 @@ Route::prefix('api/auth')->group(function () {
 });
 
 // Student Portal Endpoints
-Route::prefix('api/student')->middleware('role:student,registrar,admin,department')->group(function () {
+Route::prefix('api/student')->middleware('role:student,registrar,department')->group(function () {
     Route::get('/dashboard', [StudentController::class, 'dashboard']);
     Route::get('/grades', [StudentController::class, 'grades']);
     Route::get('/subjects', [StudentController::class, 'subjects']);
@@ -53,7 +53,7 @@ Route::prefix('api/payments')->group(function () {
 });
 
 // Registrar Module Endpoints
-Route::prefix('api/registrar')->middleware('role:registrar,admin')->group(function () {
+Route::prefix('api/registrar')->middleware('role:registrar')->group(function () {
     Route::get('/enrollments', [RegistrarController::class, 'getEnrollments']);
     Route::post('/enrollments/{studentId}/approve', [RegistrarController::class, 'approveEnrollment']);
     Route::post('/students/{studentId}/enroll', [RegistrarController::class, 'enrollStudent']);
@@ -63,7 +63,7 @@ Route::prefix('api/registrar')->middleware('role:registrar,admin')->group(functi
 });
 
 // Department Module Endpoints
-Route::prefix('api/department')->middleware('role:department,admin')->group(function () {
+Route::prefix('api/department')->middleware('role:department')->group(function () {
     Route::get('/clearances', [DepartmentController::class, 'index']);
     Route::post('/students', [DepartmentController::class, 'createStudent']);
     Route::patch('/clearances/{id}', [DepartmentController::class, 'updateClearance']);

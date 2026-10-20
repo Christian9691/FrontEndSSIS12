@@ -140,6 +140,7 @@ class AdminController extends Controller
         return response()->json([
             'users' => $users,
             'courses' => $courses,
+            'next_student_number' => Student::generateNextStudentNumber(),
         ]);
     }
 
@@ -164,16 +165,25 @@ class AdminController extends Controller
         ]);
 
         if ($user->role === 'student') {
-            $studentNumber = $request->input('student_number') ?: '2026-'.str_pad((string) mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+            $rawStudentNum = $request->input('student_number');
+            $studentNumber = (! empty($rawStudentNum) && $rawStudentNum !== 'auto')
+                ? $rawStudentNum
+                : Student::generateNextStudentNumber();
             $courseId = $request->input('course_id') ?: Course::first()?->id ?? 1;
+            $yearLevel = (int) $request->input('year_level', 1);
 
             $student = Student::create([
                 'user_id' => $user->id,
                 'course_id' => $courseId,
                 'student_number' => $studentNumber,
-                'year_level' => $request->input('year_level', 1),
+                'year_level' => $yearLevel,
                 'clearance_status' => true,
             ]);
+
+            // For regular upperclassmen (Year 2, 3, 4), credit previous curriculum years as passed
+            if ($yearLevel > 1) {
+                $student->seedPreviousYearsAsPassed();
+            }
 
             // Auto-initialize standard clearances so the student immediately appears in the Department Module
             $ccsDept = Department::where('department_code', 'CCS')->first() ?? Department::first();
@@ -207,7 +217,9 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => "User account for {$user->name} created successfully.",
-            'user' => $user,
+            'user' => $user->load('student.course'),
+            'student' => $student ?? null,
+            'next_student_number' => Student::generateNextStudentNumber(),
         ], 201);
     }
 

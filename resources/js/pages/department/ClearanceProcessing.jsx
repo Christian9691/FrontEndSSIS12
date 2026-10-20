@@ -15,24 +15,45 @@ import {
   Building2,
   BookOpen,
   Check,
+  UserPlus,
+  GraduationCap,
 } from 'lucide-react';
 
 export function ClearanceProcessing() {
   const [students, setStudents] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [nextStudentNumber, setNextStudentNumber] = useState('');
   const [filter, setFilter] = useState('all'); // 'all', 'holds', 'appeals'
   const [courseFilter, setCourseFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // Clearance Hold State
   const [holdModalStudent, setHoldModalStudent] = useState(null);
   const [holdReason, setHoldReason] = useState('');
   const [signatoryName, setSignatoryName] = useState('College Department Office');
   const [msg, setMsg] = useState(null);
 
+  // Department Student Admission / Enrollment State
+  const [enrollModal, setEnrollModal] = useState(false);
+  const [enrollName, setEnrollName] = useState('');
+  const [enrollEmail, setEnrollEmail] = useState('');
+  const [enrollCourseId, setEnrollCourseId] = useState(1);
+  const [enrollYearLevel, setEnrollYearLevel] = useState(1);
+
   const loadData = (isBackground = false) => {
     if (!isBackground) setLoading(true);
     api.get('/api/department/clearances')
-      .then((res) => setStudents(res.students || []))
+      .then((res) => {
+        setStudents(res.students || []);
+        setCourses(res.courses || []);
+        if (res.next_student_number) {
+          setNextStudentNumber(res.next_student_number);
+        }
+        if (res.courses && res.courses.length > 0 && !enrollCourseId) {
+          setEnrollCourseId(res.courses[0].id);
+        }
+      })
       .catch((err) => console.error(err))
       .finally(() => {
         if (!isBackground) setLoading(false);
@@ -77,6 +98,29 @@ export function ClearanceProcessing() {
       loadData();
     } catch (err) {
       setMsg({ type: 'danger', text: err.message || 'Failed to place hold.' });
+    }
+  };
+
+  const handleEnrollStudent = async (e) => {
+    e.preventDefault();
+    if (!enrollName.trim() || !enrollEmail.trim()) return;
+
+    try {
+      const res = await api.post('/api/department/students', {
+        name: enrollName,
+        email: enrollEmail,
+        course_id: enrollCourseId,
+        year_level: enrollYearLevel,
+      });
+
+      setMsg({ type: 'success', text: res.message });
+      setEnrollModal(false);
+      setEnrollName('');
+      setEnrollEmail('');
+      setEnrollYearLevel(1);
+      loadData();
+    } catch (err) {
+      setMsg({ type: 'danger', text: err.message || 'Failed to enroll student.' });
     }
   };
 
@@ -185,13 +229,23 @@ export function ClearanceProcessing() {
           <div>
             <h3>Departmental Student Clearance Processing</h3>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-              Manage student accountability holds, review clearance appeals, and verify graduation clearance standing
+              Manage student accountability holds, review clearance appeals, and admit departmental students
             </p>
           </div>
-          <button className="btn btn-sm btn-secondary" onClick={() => loadData(false)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-            <RotateCcw size={14} />
-            <span>Refresh</span>
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button
+              className="btn btn-sm btn-accent"
+              onClick={() => setEnrollModal(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+            >
+              <UserPlus size={14} />
+              <span>Admit Student</span>
+            </button>
+            <button className="btn btn-sm btn-secondary" onClick={() => loadData(false)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <RotateCcw size={14} />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
 
         {/* Search & Course Filter Controls Row */}
@@ -449,6 +503,97 @@ export function ClearanceProcessing() {
                 >
                   <AlertTriangle size={14} />
                   <span>Confirm Accountability Hold</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ADMIT STUDENT MODAL */}
+      {enrollModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', margin: 0 }}>
+                <UserPlus size={18} color="var(--primary)" />
+                Admit Student to Department
+              </h3>
+              <button className="modal-close-btn" onClick={() => setEnrollModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleEnrollStudent}>
+              <div className="modal-body">
+                <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    value={enrollName}
+                    onChange={(e) => setEnrollName(e.target.value)}
+                    placeholder="e.g. Christine Alcantara"
+                    required
+                  />
+                </div>
+
+                <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                  <label>Institutional Email</label>
+                  <input
+                    type="email"
+                    value={enrollEmail}
+                    onChange={(e) => setEnrollEmail(e.target.value)}
+                    placeholder="student@cuyotech.edu.ph"
+                    required
+                  />
+                </div>
+
+                <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <label style={{ margin: 0 }}>Student Number</label>
+                    <span className="badge badge-success" style={{ fontSize: '0.72rem', padding: '0.15rem 0.5rem' }}>
+                      ⚡ Automatic
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={nextStudentNumber ? `${nextStudentNumber} (Auto-assigned)` : 'Auto-assigned by system'}
+                    readOnly
+                    disabled
+                    style={{ backgroundColor: 'var(--bg-card-subtle)', cursor: 'not-allowed', color: 'var(--text-main)', fontWeight: 600 }}
+                  />
+                  <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.3rem', display: 'block' }}>
+                    The system sequentially generates student IDs (YYYY-XXXXX format) automatically.
+                  </small>
+                </div>
+
+                <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                  <label>Department Degree Program</label>
+                  <select value={enrollCourseId} onChange={(e) => setEnrollCourseId(parseInt(e.target.value) || 1)}>
+                    {courses.map((c) => (
+                      <option key={c.id} value={c.id}>{c.course_code} - {c.course_title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="input-group" style={{ marginBottom: '0.9rem' }}>
+                  <label>Year Level</label>
+                  <select value={enrollYearLevel} onChange={(e) => setEnrollYearLevel(parseInt(e.target.value) || 1)}>
+                    <option value={1}>1st Year (Freshman)</option>
+                    <option value={2}>2nd Year (Sophomore)</option>
+                    <option value={3}>3rd Year (Junior)</option>
+                    <option value={4}>4th Year (Senior)</option>
+                  </select>
+                </div>
+
+                {enrollYearLevel > 1 && (
+                  <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: '#166534', marginTop: '0.5rem' }}>
+                    <strong>✨ Curriculum Crediting Enabled:</strong> Because this student is admitted as a Regular Year {enrollYearLevel} student, all subjects from prior years (Years 1 to {enrollYearLevel - 1}) in this curriculum will be automatically credited with passing grades.
+                  </div>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setEnrollModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <UserPlus size={15} />
+                  <span>Admit & Enroll Student</span>
                 </button>
               </div>
             </form>

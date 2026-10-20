@@ -72,14 +72,159 @@ class DatabaseSeeder extends Seeder
             'total_units' => 142,
         ]);
 
-        // 3. Subjects for BSIT
+        // 3. Official University Curricula for CCS Programs (BSIT, BSCS, BSIS)
+
+        // =========================================================================
+        // 3.1 BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY (BSIT) - 45 Subjects
+        // =========================================================================
+        // 1st Year : 1st Semester (24 units)
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT101', 'subject_title' => 'Introduction to Information Technology', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT102', 'subject_title' => 'Computer Programming 1 (Python)', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITGAD1', 'subject_title' => 'Gender and Development', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITMAT1', 'subject_title' => 'Mathematics in the Modern World', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITNSTP1', 'subject_title' => 'National Service Training Program 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITPED1', 'subject_title' => 'Physical Activities Toward Health and Fitness 1', 'units' => 2, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITPHD1', 'subject_title' => 'PnCians Holistic Development 1', 'units' => 1, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITPSY1', 'subject_title' => 'Understanding the Self', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITREAD1', 'subject_title' => 'Science and Development of Reading', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+
+        // 1st Year : 2nd Semester (24 units)
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT103', 'subject_title' => 'Computer Programming 2 (Advanced OOP)', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT104', 'subject_title' => 'Discrete Mathematics for IT', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT105', 'subject_title' => 'Human Computer Interaction', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITCOM1', 'subject_title' => 'Purposive Communication', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITHIS1', 'subject_title' => 'Readings in Philippine History', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITHMN1', 'subject_title' => 'Art Appreciation', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITNSTP2', 'subject_title' => 'National Service Training Program 2', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITPED2', 'subject_title' => 'Physical Activities Toward Health and Fitness 2', 'units' => 2, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITPHD2', 'subject_title' => 'PnCians Holistic Development 2', 'units' => 1, 'semester' => '2nd Semester', 'year_level' => 1]);
+
+        // 2nd Year : 1st Semester (23 units)
         $it201 = Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT201', 'subject_title' => 'Data Structures and Algorithms', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
         $it202 = Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT202', 'subject_title' => 'Systems Analysis and Design', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
         $it203 = Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT203', 'subject_title' => 'Web Systems and Technologies', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
         $ge104 = Subject::create(['course_id' => $bsit->id, 'subject_code' => 'GE104', 'subject_title' => 'Ethics and Professional Conduct', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
         $it205 = Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT205', 'subject_title' => 'Database Management Systems 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITENT1', 'subject_title' => 'The Entrepreneurial Mind', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITPED3', 'subject_title' => 'Physical Activities Toward Health and Fitness 3', 'units' => 2, 'semester' => '1st Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITSTS1', 'subject_title' => 'Science, Technology and Society', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
 
-        // 3.1 Official University of Cabuyao (PnC) BSCS Curriculum Subjects
+        // 2nd Year : 2nd Semester (26 units)
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT206', 'subject_title' => 'Database Management Systems 2 (Advanced)', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT207', 'subject_title' => 'Advanced Web Development & API Design', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT208', 'subject_title' => 'Networking 1 (Fundamentals & Routing)', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT209', 'subject_title' => 'Quantitative Methods and Modeling', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT210', 'subject_title' => 'Platform Technologies & Operating Systems', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITSOC1', 'subject_title' => 'The Contemporary World', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITETH1', 'subject_title' => 'Ethics in Information Age', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITPED4', 'subject_title' => 'Physical Activities Toward Health and Fitness 4', 'units' => 2, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITRIZ1', 'subject_title' => 'Life and Works of Rizal', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+
+        // 3rd Year : 1st Semester (21 units)
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT301', 'subject_title' => 'Information Assurance and Security 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT302', 'subject_title' => 'Networking 2 (Enterprise Infrastructure)', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT303', 'subject_title' => 'Mobile Applications Development', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT304', 'subject_title' => 'Systems Integration and Architecture 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT305', 'subject_title' => 'Cloud Computing Foundations & DevOps', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITENV1', 'subject_title' => 'Environmental Science', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'ITTEC1', 'subject_title' => 'Technopreneurship in IT', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+
+        // 3rd Year : 2nd Semester (18 units)
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT306', 'subject_title' => 'Information Assurance and Security 2', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT307', 'subject_title' => 'Systems Administration and Maintenance', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT308', 'subject_title' => 'Systems Integration and Architecture 2', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT309', 'subject_title' => 'IT Capstone Project 1', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT310', 'subject_title' => 'Social Issues and Professional Practice', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT311', 'subject_title' => 'Enterprise Architecture', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+
+        // 4th Year : 1st Semester (17 units)
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT401', 'subject_title' => 'IT Capstone Project 2', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT402', 'subject_title' => 'Network Administration and Automation', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT403', 'subject_title' => 'Data Analytics and Business Intelligence', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT404', 'subject_title' => 'Virtualization and Cloud Infrastructure', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT405', 'subject_title' => 'IT Audit and Risk Management', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT406', 'subject_title' => 'Applied Machine Learning for IT', 'units' => 2, 'semester' => '1st Semester', 'year_level' => 4]);
+
+        // 4th Year : 2nd Semester (4 units)
+        Subject::create(['course_id' => $bsit->id, 'subject_code' => 'IT407', 'subject_title' => 'IT Practicum / Industry Internship (486 hours)', 'units' => 4, 'semester' => '2nd Semester', 'year_level' => 4]);
+
+        // =========================================================================
+        // 3.2 BACHELOR OF SCIENCE IN INFORMATION SYSTEMS (BSIS) - 45 Subjects
+        // =========================================================================
+        // 1st Year : 1st Semester (24 units)
+        $is101 = Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS101', 'subject_title' => 'Fundamentals of Information Systems', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        $is102 = Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS102', 'subject_title' => 'Computer Programming 1 (Python)', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISGAD1', 'subject_title' => 'Gender and Development', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISMAT1', 'subject_title' => 'Mathematics in the Modern World', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISNSTP1', 'subject_title' => 'National Service Training Program 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISPED1', 'subject_title' => 'Physical Activities Toward Health and Fitness 1', 'units' => 2, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISPHD1', 'subject_title' => 'PnCians Holistic Development 1', 'units' => 1, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISPSY1', 'subject_title' => 'Understanding the Self', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISREAD1', 'subject_title' => 'Science and Development of Reading', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
+
+        // 1st Year : 2nd Semester (24 units)
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS103', 'subject_title' => 'Computer Programming 2 (Java & Business Logic)', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS104', 'subject_title' => 'Organization and Management Concepts', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS105', 'subject_title' => 'Web Application Development for Business', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISCOM1', 'subject_title' => 'Purposive Communication', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISHIS1', 'subject_title' => 'Readings in Philippine History', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISHMN1', 'subject_title' => 'Art Appreciation', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISNSTP2', 'subject_title' => 'National Service Training Program 2', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISPED2', 'subject_title' => 'Physical Activities Toward Health and Fitness 2', 'units' => 2, 'semester' => '2nd Semester', 'year_level' => 1]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISPHD2', 'subject_title' => 'PnCians Holistic Development 2', 'units' => 1, 'semester' => '2nd Semester', 'year_level' => 1]);
+
+        // 2nd Year : 1st Semester (23 units)
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS201', 'subject_title' => 'Data Structures and Algorithms for Business', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS202', 'subject_title' => 'Financial Accounting and Business Transactions', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS203', 'subject_title' => 'Enterprise Database Management Systems 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS204', 'subject_title' => 'Business Process Management and Modeling', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISENT1', 'subject_title' => 'The Entrepreneurial Mind', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISETH1', 'subject_title' => 'Ethics in Business and Technology', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISPED3', 'subject_title' => 'Physical Activities Toward Health and Fitness 3', 'units' => 2, 'semester' => '1st Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISSTS1', 'subject_title' => 'Science, Technology and Society', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 2]);
+
+        // 2nd Year : 2nd Semester (26 units)
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS205', 'subject_title' => 'Enterprise Database Management Systems 2', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS206', 'subject_title' => 'Systems Analysis and Design for IS', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS207', 'subject_title' => 'Marketing and Consumer Analytics', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS208', 'subject_title' => 'Discrete Mathematics for Business', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS209', 'subject_title' => 'Quantitative Business Analysis', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS210', 'subject_title' => 'IT Infrastructure and Network Fundamentals', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISSOC1', 'subject_title' => 'The Contemporary World', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISPED4', 'subject_title' => 'Physical Activities Toward Health and Fitness 4', 'units' => 2, 'semester' => '2nd Semester', 'year_level' => 2]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISRIZ1', 'subject_title' => 'Life and Works of Rizal', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 2]);
+
+        // 3rd Year : 1st Semester (21 units)
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS301', 'subject_title' => 'Enterprise Systems Architecture (ERP)', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS302', 'subject_title' => 'IS Project Management & Quality Assurance', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS303', 'subject_title' => 'Business Intelligence & Decision Support Systems', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS304', 'subject_title' => 'IT Security, Governance and Compliance', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS305', 'subject_title' => 'E-Commerce and Digital Business Strategy', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISENV1', 'subject_title' => 'Environmental Science', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'ISTEC1', 'subject_title' => 'Technopreneurship in Information Systems', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 3]);
+
+        // 3rd Year : 2nd Semester (18 units)
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS306', 'subject_title' => 'Enterprise Resource Planning Configuration', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS307', 'subject_title' => 'Customer Relationship Management Systems', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS308', 'subject_title' => 'Big Data Analytics for Organizations', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS309', 'subject_title' => 'IS Capstone Project 1', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS310', 'subject_title' => 'IS Strategy, Management and Acquisition', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS311', 'subject_title' => 'Human Resource Information Systems', 'units' => 3, 'semester' => '2nd Semester', 'year_level' => 3]);
+
+        // 4th Year : 1st Semester (17 units)
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS401', 'subject_title' => 'IS Capstone Project 2', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS402', 'subject_title' => 'IT Service Management and ITIL', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS403', 'subject_title' => 'Knowledge Management Systems', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS404', 'subject_title' => 'Strategic IT Leadership and Innovation', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS405', 'subject_title' => 'Information Systems Audit and Controls', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 4]);
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS406', 'subject_title' => 'Applied Business AI and Automation', 'units' => 2, 'semester' => '1st Semester', 'year_level' => 4]);
+
+        // 4th Year : 2nd Semester (4 units)
+        Subject::create(['course_id' => $bsis->id, 'subject_code' => 'IS407', 'subject_title' => 'IS Practicum / Industry Internship (486 hours)', 'units' => 4, 'semester' => '2nd Semester', 'year_level' => 4]);
+
+        // =========================================================================
+        // 3.3 BACHELOR OF SCIENCE IN COMPUTER SCIENCE (BSCS) - 45 Subjects
+        // =========================================================================
         // 1st Year : 1st Semester (24 units)
         Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS101', 'subject_title' => 'Introduction to Computing', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
         Subject::create(['course_id' => $bscs->id, 'subject_code' => 'CCS102', 'subject_title' => 'Computer Programming 1', 'units' => 3, 'semester' => '1st Semester', 'year_level' => 1]);
@@ -201,8 +346,9 @@ class DatabaseSeeder extends Seeder
             'year_level' => 2,
             'clearance_status' => true,
         ]);
+        $student1->seedPreviousYearsAsPassed();
 
-        // Enrollments & Grades for Juan
+        // Enrollments & Grades for Juan (Current Year 2 Semester 1)
         Enrollment::create(['student_id' => $student1->id, 'subject_id' => $it201->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
         Enrollment::create(['student_id' => $student1->id, 'subject_id' => $it202->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.75, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
         Enrollment::create(['student_id' => $student1->id, 'subject_id' => $it203->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.25, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
@@ -229,8 +375,9 @@ class DatabaseSeeder extends Seeder
             'year_level' => 3,
             'clearance_status' => true,
         ]);
+        $student2->seedPreviousYearsAsPassed();
 
-        // Enrollments & Grades for Maria Santos (BSCS 3rd Year)
+        // Enrollments & Grades for Maria Santos (BSCS 3rd Year Current Semester)
         Enrollment::create(['student_id' => $student2->id, 'subject_id' => $ccs109->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.25, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
         Enrollment::create(['student_id' => $student2->id, 'subject_id' => $ccs106->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
         Enrollment::create(['student_id' => $student2->id, 'subject_id' => $ccs112->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
@@ -258,6 +405,7 @@ class DatabaseSeeder extends Seeder
             'year_level' => 2,
             'clearance_status' => true,
         ]);
+        $studentCarlos->seedPreviousYearsAsPassed();
 
         Enrollment::create(['student_id' => $studentCarlos->id, 'subject_id' => $ccs104->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.50, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
         Enrollment::create(['student_id' => $studentCarlos->id, 'subject_id' => $ccs107->id, 'academic_year' => '2026-2027', 'semester' => '1st Semester', 'grade' => 1.25, 'remarks' => 'Passed', 'enrollment_status' => 'enrolled']);
@@ -287,6 +435,23 @@ class DatabaseSeeder extends Seeder
             'year_level' => 1,
             'clearance_status' => false,
         ]);
+
+        // Enroll Pedro Reyes in 1st Year 1st Sem BSIS Subjects
+        $bsisY1S1Subjects = Subject::where('course_id', $bsis->id)
+            ->where('year_level', 1)
+            ->where('semester', '1st Semester')
+            ->get();
+        foreach ($bsisY1S1Subjects as $sub) {
+            Enrollment::create([
+                'student_id' => $student3->id,
+                'subject_id' => $sub->id,
+                'academic_year' => '2026-2027',
+                'semester' => '1st Semester',
+                'grade' => null,
+                'remarks' => 'Enrolled',
+                'enrollment_status' => 'enrolled',
+            ]);
+        }
 
         ClearanceRecord::create([
             'student_id' => $student3->id,

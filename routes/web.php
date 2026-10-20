@@ -64,6 +64,7 @@ Route::prefix('api/registrar')->middleware('role:registrar,admin')->group(functi
 // Department Module Endpoints
 Route::prefix('api/department')->middleware('role:department,admin')->group(function () {
     Route::get('/clearances', [DepartmentController::class, 'index']);
+    Route::post('/students', [DepartmentController::class, 'createStudent']);
     Route::patch('/clearances/{id}', [DepartmentController::class, 'updateClearance']);
     Route::post('/clearances/hold', [DepartmentController::class, 'addClearanceHold']);
 });

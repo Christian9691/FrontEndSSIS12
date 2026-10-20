@@ -34,6 +34,7 @@ export function UserAccounts() {
   const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState('student');
   const [newStudentNumber, setNewStudentNumber] = useState('');
+  const [nextStudentNumber, setNextStudentNumber] = useState('');
   const [newCourseId, setNewCourseId] = useState(1);
   const [newYearLevel, setNewYearLevel] = useState(1);
 
@@ -42,6 +43,10 @@ export function UserAccounts() {
       .then((res) => {
         setUsers(res.users || []);
         setCourses(res.courses || []);
+        if (res.next_student_number) {
+          setNextStudentNumber(res.next_student_number);
+          setNewStudentNumber(res.next_student_number);
+        }
         if (res.courses && res.courses.length > 0 && !newCourseId) {
           setNewCourseId(res.courses[0].id);
         }
@@ -72,7 +77,7 @@ export function UserAccounts() {
         name: newName,
         email: newEmail,
         role: newRole,
-        student_number: newRole === 'student' ? newStudentNumber : undefined,
+        student_number: newRole === 'student' ? 'auto' : undefined,
         course_id: newRole === 'student' ? newCourseId : undefined,
         year_level: newRole === 'student' ? newYearLevel : undefined,
       });
@@ -378,13 +383,22 @@ export function UserAccounts() {
                 {newRole === 'student' && (
                   <>
                     <div className="input-group" style={{ marginBottom: '0.9rem' }}>
-                      <label>Student Number</label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                        <label style={{ margin: 0 }}>Student Number</label>
+                        <span className="badge badge-success" style={{ fontSize: '0.72rem', padding: '0.15rem 0.5rem' }}>
+                          ⚡ Automatic
+                        </span>
+                      </div>
                       <input
                         type="text"
-                        value={newStudentNumber}
-                        onChange={(e) => setNewStudentNumber(e.target.value)}
-                        placeholder="2026-00128"
+                        value={nextStudentNumber ? `${nextStudentNumber} (Auto-assigned)` : 'Auto-assigned by system'}
+                        readOnly
+                        disabled
+                        style={{ backgroundColor: 'var(--bg-card-subtle)', cursor: 'not-allowed', color: 'var(--text-main)', fontWeight: 600 }}
                       />
+                      <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.3rem', display: 'block' }}>
+                        Sequential university student ID is generated automatically. Upperclassmen (Year 2+) will also have their prior curriculum courses automatically credited as passed.
+                      </small>
                     </div>
                     <div className="input-group" style={{ marginBottom: '0.9rem' }}>
                       <label>Degree Program / Course</label>

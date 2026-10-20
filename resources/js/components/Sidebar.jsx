@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ROLES } from '../config';
 import { ChangePasswordModal } from './ChangePasswordModal';
@@ -23,8 +23,17 @@ import {
 
 export function Sidebar({ collapsed = false, onToggle }) {
   const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const roleConfig = ROLES[currentUser?.role] || ROLES.student;
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate('/login', { replace: true });
+    }
+  };
 
   const getRouteIcon = (path) => {
     if (path.includes('/grades')) return <GraduationCap size={19} className="sidebar-svg-icon" />;
@@ -174,8 +183,9 @@ export function Sidebar({ collapsed = false, onToggle }) {
           {!collapsed && <span>Change Password</span>}
         </button>
         <button
+          type="button"
           className="signout-btn"
-          onClick={logout}
+          onClick={handleLogout}
           title="Sign Out"
           style={{
             display: 'flex',

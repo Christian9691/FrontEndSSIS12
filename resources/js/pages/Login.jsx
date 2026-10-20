@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ROLES } from '../config';
 import { LogIn, KeyRound, Shield, AlertCircle } from 'lucide-react';
 
 export function Login() {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,7 +18,9 @@ export function Login() {
     setError('');
 
     try {
-      await login(identifier, password);
+      const user = await login(identifier, password);
+      const roleConfig = ROLES[user?.role] || ROLES.student;
+      navigate(roleConfig.basePath, { replace: true });
     } catch (err) {
       setError(err.message || 'Login failed. Please verify credentials.');
     } finally {

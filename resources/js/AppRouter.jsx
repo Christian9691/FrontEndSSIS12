@@ -39,7 +39,7 @@ import { MustChangePasswordModal } from './components/MustChangePasswordModal';
 
 function RoleRoute({ allowedRoles, children }) {
   const { currentUser } = useAuth();
-  if (!currentUser) return <Navigate to="/" replace />;
+  if (!currentUser) return <Navigate to="/login" replace />;
   if (allowedRoles.includes(currentUser.role)) {
     return children;
   }
@@ -92,7 +92,13 @@ function AppLayout() {
   }
 
   if (!currentUser) {
-    return <Login />;
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
   }
 
   const roleConfig = ROLES[currentUser.role] || ROLES.student;
@@ -141,6 +147,7 @@ function AppLayout() {
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
             {/* Root & Fallback Redirects */}
+            <Route path="/login" element={<Navigate to={roleConfig.basePath} replace />} />
             <Route path="/" element={<Navigate to={roleConfig.basePath} replace />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
@@ -169,7 +176,7 @@ class ErrorBoundary extends React.Component {
 
   handleReset = () => {
     localStorage.removeItem('ssis_user');
-    window.location.href = '/';
+    window.location.href = '/login';
   };
 
   render() {

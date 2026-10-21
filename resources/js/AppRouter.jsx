@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ROLES } from './config';
+import logo from '../images/cuyotech-logo.png';
 import { RotateCcw, KeyRound } from 'lucide-react';
 
 import { Navbar } from './components/Navbar';
@@ -82,7 +83,9 @@ function AppLayout() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-app)' }}>
         <div style={{ textAlign: 'center' }}>
-          <div className="university-crest">CTU</div>
+          <div className="university-crest">
+            <img src={logo} alt="CuyoTech University logo" />
+          </div>
           <p style={{ marginTop: '0.8rem', fontWeight: 600, color: 'var(--primary-dark)' }}>
             Loading CuyoTech University SSIS...
           </p>
@@ -184,7 +187,9 @@ class ErrorBoundary extends React.Component {
       return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-app)', padding: '2rem' }}>
           <div className="card" style={{ maxWidth: '480px', width: '100%', textAlign: 'center', padding: '2rem' }}>
-            <div className="university-crest" style={{ margin: '0 auto 1rem' }}>CTU</div>
+            <div className="university-crest" style={{ margin: '0 auto 1rem' }}>
+              <img src={logo} alt="CuyoTech University logo" />
+            </div>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
               System Interface Notice
             </h2>

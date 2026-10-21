@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ROLES } from '../config';
 import { ChangePasswordModal } from './ChangePasswordModal';
+import logo from '../../images/cuyotech-logo.png';
 import {
   LayoutDashboard,
   GraduationCap,
@@ -66,12 +67,12 @@ export function Sidebar({ collapsed = false, onToggle }) {
           style={{ cursor: collapsed ? 'pointer' : 'default' }}
           title={collapsed ? 'Click to expand sidebar' : 'CuyoTech SSIS'}
         >
-          CTU
+          <img src={logo} alt="CuyoTech University logo" />
         </div>
         {!collapsed && (
           <div className="brand-info">
             <h2>CuyoTech SSIS</h2>
-            <p>Pamantasan ng Cabuyao</p>
+           
           </div>
         )}
         {!collapsed && onToggle && (

@@ -90,19 +90,20 @@ button, input, select, textarea {
 }
 
 .university-crest {
-  width: 68px;
-  height: 68px;
+  width: 84px;
+  height: 84px;
   margin: 0 auto 0.75rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.5rem;
-  box-shadow: 0 4px 10px rgba(27, 83, 52, 0.3);
-  border: 3px solid #fef3c7;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.university-crest img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .login-header h1 {
@@ -281,20 +282,21 @@ textarea,
 }
 
 .brand-crest {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  font-size: 1.05rem;
-  color: #fff;
   flex-shrink: 0;
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
+  transition: transform 0.18s ease;
+}
+
+.brand-crest img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .brand-crest:hover {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ROLES } from '../config';
+import logo from '../../images/cuyotech-logo.png';
 import { LogIn, KeyRound, Shield, AlertCircle } from 'lucide-react';
 
 export function Login() {
@@ -32,7 +33,9 @@ export function Login() {
     <div className="login-wrapper">
       <div className="login-card">
         <div className="login-header">
-          <div className="university-crest">CTU</div>
+          <div className="university-crest">
+            <img src={logo} alt="CuyoTech University logo" />
+          </div>
           <h1>CuyoTech University</h1>
           <p>Student Services Information System (SSIS)</p>
         </div>

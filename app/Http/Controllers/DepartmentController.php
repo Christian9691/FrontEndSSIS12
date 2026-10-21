@@ -4,18 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\ClearanceRecord;
+use App\Models\Course;
 use App\Models\Department;
 use App\Models\Notification;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class DepartmentController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
         $departments = Department::withCount('courses')->get();
+        $courses = Course::all();
 
         $students = Student::with(['user', 'course.department', 'clearanceRecords.department'])
             ->get()
@@ -46,8 +50,82 @@ class DepartmentController extends Controller
 
         return response()->json([
             'departments' => $departments,
+            'courses' => $courses,
             'students' => $students,
+            'next_student_number' => Student::generateNextStudentNumber(),
         ]);
+    }
+
+    public function createStudent(Request $request): JsonResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'email' => 'required|email|unique:users,email',
+            'course_id' => 'required|exists:courses,id',
+            'year_level' => 'nullable|integer|min:1|max:5',
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        $studentNumber = Student::generateNextStudentNumber();
+        $yearLevel = (int) $request->input('year_level', 1);
+        $initialPassword = $request->input('password') ?: $studentNumber;
+
+        $user = User::create([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($initialPassword),
+            'role' => 'student',
+            'status' => 'active',
+            'must_change_password' => true,
+        ]);
+
+        $student = Student::create([
+            'user_id' => $user->id,
+            'course_id' => (int) $request->input('course_id'),
+            'student_number' => $studentNumber,
+            'year_level' => $yearLevel,
+            'clearance_status' => true,
+        ]);
+
+        // If upperclassman regular student, credit previous years as passed
+        if ($yearLevel > 1) {
+            $student->seedPreviousYearsAsPassed();
+        }
+
+        // Initialize clearances
+        $ccsDept = Department::where('department_code', 'CCS')->first() ?? Department::first();
+        $libDept = Department::where('department_code', 'LIB')->first() ?? Department::skip(3)->first();
+        if ($ccsDept) {
+            ClearanceRecord::create([
+                'student_id' => $student->id,
+                'department_id' => $ccsDept->id,
+                'signatory_name' => $ccsDept->department_name.' Office',
+                'status' => 'cleared',
+                'cleared_at' => now(),
+            ]);
+        }
+        if ($libDept) {
+            ClearanceRecord::create([
+                'student_id' => $student->id,
+                'department_id' => $libDept->id,
+                'signatory_name' => 'University Library',
+                'status' => 'cleared',
+                'cleared_at' => now(),
+            ]);
+        }
+
+        AuditLog::record(
+            Auth::id() ?? 4,
+            'Student Enrolled by Department',
+            "Department enrolled student {$student->student_number} ({$user->name}) in course ID {$student->course_id}"
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => "Student {$user->name} enrolled successfully with Student ID {$studentNumber}. Initial password: {$initialPassword} (forced change on first sign-in).",
+            'student' => $student->load(['user', 'course']),
+            'initial_password' => $initialPassword,
+        ], 201);
     }
 
     public function updateClearance(Request $request, int $recordId): JsonResponse

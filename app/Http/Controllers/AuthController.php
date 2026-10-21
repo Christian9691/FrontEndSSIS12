@@ -17,13 +17,11 @@ class AuthController extends Controller
     {
         $request->validate([
             'identifier' => 'required|string',
-            'password' => 'nullable|string',
-            'role' => 'nullable|string',
+            'password' => 'required|string',
         ]);
 
         $identifier = trim($request->input('identifier'));
-        $password = $request->input('password') ?? 'password';
-        $role = $request->input('role');
+        $password = (string) $request->input('password');
 
         $throttleKey = 'login:'.$request->ip();
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
@@ -35,7 +33,7 @@ class AuthController extends Controller
             ], 429);
         }
 
-        // Allow login by student number, email, or role
+        // Allow login by student number or email
         $user = null;
         if (str_contains($identifier, '@')) {
             $user = User::where('email', $identifier)->first();
@@ -47,11 +45,6 @@ class AuthController extends Controller
             } else {
                 $user = User::where('email', $identifier)->first();
             }
-        }
-
-        // If no user found and role is provided, find first active user with that role (demo helper in local/staging)
-        if (! $user && $role && ! app()->isProduction()) {
-            $user = User::where('role', $role)->first();
         }
 
         if (! $user) {
@@ -71,7 +64,8 @@ class AuthController extends Controller
         }
 
         // Validate password against hashed database password
-        if ($request->filled('password') && ! Hash::check($password, $user->password) && $password !== 'password') {
+        $password = (string) $request->input('password', '');
+        if (empty($password) || ! Hash::check($password, $user->password)) {
             RateLimiter::hit($throttleKey, 900);
 
             return response()->json([
@@ -95,9 +89,55 @@ class AuthController extends Controller
         ]);
     }
 
+    public function changePassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated session. Please sign in.',
+            ], 401);
+        }
+
+        if (! Hash::check($request->input('current_password'), $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current password is incorrect.',
+            ], 422);
+        }
+
+        if (Hash::check($request->input('new_password'), $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'New password cannot be the same as your current password.',
+            ], 422);
+        }
+
+        $user->password = Hash::make($request->input('new_password'));
+        $user->must_change_password = false;
+        $user->save();
+
+        AuditLog::record(
+            $user->id,
+            'Password Changed',
+            "User {$user->name} ({$user->email}) successfully updated their account password"
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your password has been changed successfully.',
+            'user' => $this->formatUserData($user),
+        ]);
+    }
+
     public function me(Request $request): JsonResponse
     {
-        $user = Auth::user() ?? User::where('role', 'student')->first();
+        $user = Auth::user();
         if (! $user) {
             return response()->json(['authenticated' => false]);
         }
@@ -135,6 +175,7 @@ class AuthController extends Controller
             'email' => $user->email,
             'role' => $user->role,
             'status' => $user->status,
+            'must_change_password' => (bool) $user->must_change_password,
         ];
 
         if ($user->role === 'student' && $user->student) {

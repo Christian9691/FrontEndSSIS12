@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
-    public function dashboard(): JsonResponse
+    public function dashboard(Request $request): JsonResponse
     {
         $totalUsers = User::count();
         $totalStudents = Student::count();
@@ -26,18 +26,31 @@ class AdminController extends Controller
         $totalCollections = Payment::where('payment_status', 'verified')->sum('amount_paid');
         $clearedStudents = Student::where('clearance_status', true)->count();
 
-        $recentLogs = AuditLog::with('user')
-            ->orderBy('created_at', 'desc')
-            ->take(50)
-            ->get()
-            ->map(fn ($l) => [
-                'id' => $l->id,
-                'user_name' => $l->user->name ?? 'System',
-                'action' => $l->action,
-                'details' => $l->details,
-                'ip_address' => $l->ip_address,
-                'created_at' => $l->created_at->format('M d, Y h:i A'),
-            ]);
+        $limit = $request->query('limit', 50);
+        $sort = strtolower($request->query('sort', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $date = $request->query('date');
+
+        $query = AuditLog::with('user');
+
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        }
+
+        $query->orderBy('created_at', $sort);
+
+        if ($limit !== 'all' && (int) $limit > 0) {
+            $query->take((int) $limit);
+        }
+
+        $recentLogs = $query->get()->map(fn ($l) => [
+            'id' => $l->id,
+            'user_name' => $l->user->name ?? 'System',
+            'action' => $l->action,
+            'details' => $l->details,
+            'ip_address' => $l->ip_address,
+            'created_at' => $l->created_at->format('M d, Y h:i A'),
+            'raw_date' => $l->created_at->toDateString(),
+        ]);
 
         return response()->json([
             'metrics' => [
@@ -52,6 +65,61 @@ class AdminController extends Controller
         ]);
     }
 
+    public function getAuditLogs(Request $request): JsonResponse
+    {
+        $limit = $request->query('limit', 50);
+        $sort = strtolower($request->query('sort', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $date = $request->query('date');
+        $datePreset = $request->query('date_preset');
+        $search = $request->query('search');
+
+        $query = AuditLog::with('user');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('action', 'like', "%{$search}%")
+                    ->orWhere('details', 'like', "%{$search}%")
+                    ->orWhere('ip_address', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        } elseif ($datePreset) {
+            match ($datePreset) {
+                'today' => $query->whereDate('created_at', now()->today()),
+                'yesterday' => $query->whereDate('created_at', now()->yesterday()),
+                'this_week' => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+                'this_month' => $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
+                default => null,
+            };
+        }
+
+        $totalCount = (clone $query)->count();
+
+        $query->orderBy('created_at', $sort);
+
+        if ($limit !== 'all' && (int) $limit > 0) {
+            $query->take((int) $limit);
+        }
+
+        $logs = $query->get()->map(fn ($l) => [
+            'id' => $l->id,
+            'user_name' => $l->user->name ?? 'System',
+            'action' => $l->action,
+            'details' => $l->details,
+            'ip_address' => $l->ip_address,
+            'created_at' => $l->created_at->format('M d, Y h:i A'),
+            'raw_date' => $l->created_at->toDateString(),
+        ]);
+
+        return response()->json([
+            'audit_logs' => $logs,
+            'total_count' => $totalCount,
+        ]);
+    }
+
     public function getUsers(): JsonResponse
     {
         $users = User::with(['student.course'])->orderBy('id', 'asc')->get()->map(function ($u) {
@@ -63,6 +131,8 @@ class AdminController extends Controller
                 'status' => $u->status,
                 'student_number' => $u->student->student_number ?? null,
                 'course' => $u->student->course->course_code ?? null,
+                'course_id' => $u->student->course_id ?? null,
+                'year_level' => $u->student->year_level ?? null,
                 'created_at' => $u->created_at->format('Y-m-d'),
             ];
         });
@@ -72,6 +142,7 @@ class AdminController extends Controller
         return response()->json([
             'users' => $users,
             'courses' => $courses,
+            'next_student_number' => Student::generateNextStudentNumber(),
         ]);
     }
 
@@ -87,25 +158,41 @@ class AdminController extends Controller
             'year_level' => 'nullable|integer|min:1|max:5',
         ]);
 
+        if ($request->input('role') === 'student') {
+            $rawStudentNum = $request->input('student_number');
+            $studentNumber = (! empty($rawStudentNum) && $rawStudentNum !== 'auto')
+                ? $rawStudentNum
+                : Student::generateNextStudentNumber();
+            $initialPassword = $request->input('password') ?: $studentNumber;
+        } else {
+            $initialPassword = $request->input('password') ?: 'CuyoTech2026!';
+        }
+
         $user = User::create([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password', 'password')),
+            'password' => Hash::make($initialPassword),
             'role' => $request->input('role'),
             'status' => 'active',
+            'must_change_password' => true,
         ]);
 
         if ($user->role === 'student') {
-            $studentNumber = $request->input('student_number') ?: '2026-'.str_pad((string) mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
             $courseId = $request->input('course_id') ?: Course::first()?->id ?? 1;
+            $yearLevel = (int) $request->input('year_level', 1);
 
             $student = Student::create([
                 'user_id' => $user->id,
                 'course_id' => $courseId,
                 'student_number' => $studentNumber,
-                'year_level' => $request->input('year_level', 1),
+                'year_level' => $yearLevel,
                 'clearance_status' => true,
             ]);
+
+            // For regular upperclassmen (Year 2, 3, 4), credit previous curriculum years as passed
+            if ($yearLevel > 1) {
+                $student->seedPreviousYearsAsPassed();
+            }
 
             // Auto-initialize standard clearances so the student immediately appears in the Department Module
             $ccsDept = Department::where('department_code', 'CCS')->first() ?? Department::first();
@@ -138,8 +225,11 @@ class AdminController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "User account for {$user->name} created successfully.",
-            'user' => $user,
+            'message' => "User account for {$user->name} created successfully. Initial temporary password: {$initialPassword} (forced change on first sign-in).",
+            'user' => $user->load('student.course'),
+            'student' => $student ?? null,
+            'initial_password' => $initialPassword,
+            'next_student_number' => Student::generateNextStudentNumber(),
         ], 201);
     }
 
@@ -165,6 +255,54 @@ class AdminController extends Controller
             'success' => true,
             'message' => "Account {$user->name} is now {$newStatus}.",
             'status' => $user->status,
+        ]);
+    }
+
+    /**
+     * Admin update user institutional information (name, email, role, status, student course/year).
+     * SECURITY POLICY: Administrator CANNOT modify user passwords. Passwords can only be changed by the account owner.
+     */
+    public function updateUser(Request $request, int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'email' => "required|email|unique:users,email,{$id}",
+            'role' => 'required|in:student,registrar,cashier,admin,department',
+            'course_id' => 'nullable|exists:courses,id',
+            'year_level' => 'nullable|integer|min:1|max:5',
+            'status' => 'nullable|in:active,inactive,suspended',
+        ]);
+
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        $user->role = $request->input('role');
+        if ($request->filled('status')) {
+            $user->status = $request->input('status');
+        }
+        $user->save();
+
+        if ($user->role === 'student' && $user->student) {
+            if ($request->filled('course_id')) {
+                $user->student->course_id = (int) $request->input('course_id');
+            }
+            if ($request->filled('year_level')) {
+                $user->student->year_level = (int) $request->input('year_level');
+            }
+            $user->student->save();
+        }
+
+        AuditLog::record(
+            Auth::id() ?? 1,
+            'User Information Updated',
+            "Admin updated user information for {$user->name} (Role: {$user->role})"
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => "Institutional records for {$user->name} updated successfully.",
+            'user' => $user->load('student.course'),
         ]);
     }
 }

@@ -7,24 +7,8 @@ import { StatCard } from '../../components/StatCard';
 import { RefreshCw, Zap, GraduationCap, Inbox, CreditCard, Building2, Lock, FileText, ShieldCheck } from 'lucide-react';
 
 export function SystemOverview() {
-  const { switchRole } = useAuth();
-  const navigate = useNavigate();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [switchingTo, setSwitchingTo] = useState(null);
-
-  const handleQuickSwitch = async (roleKey) => {
-    setSwitchingTo(roleKey);
-    try {
-      const user = await switchRole(roleKey);
-      const dest = (user && ROLES[user.role]) ? ROLES[user.role].basePath : ROLES[roleKey]?.basePath;
-      if (dest) navigate(dest);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSwitchingTo(null);
-    }
-  };
 
   const loadData = (isBackground = false) => {
     if (!isBackground) setLoading(true);
@@ -64,59 +48,6 @@ export function SystemOverview() {
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           {loading ? 'Refreshing...' : 'Refresh Metrics'}
         </button>
-      </div>
-
-      {/* Quick Portal Switcher Banner */}
-      <div style={{ background: '#f8fafc', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.85rem 1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Zap size={20} color="var(--accent)" />
-          <div>
-            <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)', display: 'block' }}>Executive Role & Portal Switcher</strong>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Instantly switch your active persona to inspect any subsystem</span>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            className="btn btn-sm btn-secondary"
-            onClick={() => handleQuickSwitch('student')}
-            disabled={switchingTo !== null}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-          >
-            <GraduationCap size={14} />
-            {switchingTo === 'student' ? 'Switching...' : 'Student Portal'}
-          </button>
-          <button
-            type="button"
-            className="btn btn-sm btn-secondary"
-            onClick={() => handleQuickSwitch('registrar')}
-            disabled={switchingTo !== null}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-          >
-            <Inbox size={14} />
-            {switchingTo === 'registrar' ? 'Switching...' : 'Registrar'}
-          </button>
-          <button
-            type="button"
-            className="btn btn-sm btn-secondary"
-            onClick={() => handleQuickSwitch('cashier')}
-            disabled={switchingTo !== null}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-          >
-            <CreditCard size={14} />
-            {switchingTo === 'cashier' ? 'Switching...' : 'Cashier'}
-          </button>
-          <button
-            type="button"
-            className="btn btn-sm btn-secondary"
-            onClick={() => handleQuickSwitch('department')}
-            disabled={switchingTo !== null}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-          >
-            <Building2 size={14} />
-            {switchingTo === 'department' ? 'Switching...' : 'Department'}
-          </button>
-        </div>
       </div>
 
       {/* Primary KPI Row */}

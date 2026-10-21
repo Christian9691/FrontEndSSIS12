@@ -6,11 +6,11 @@ export function StatusBadge({ status }) {
 
   if (['released', 'verified', 'passed', 'enrolled', 'cleared', 'active'].includes(s)) {
     cls = 'badge-success';
-  } else if (['pending', 'pending_payment', 'unpaid', 'processing', 'in progress'].includes(s)) {
+  } else if (['pending', 'pending_payment', 'unpaid', 'processing', 'in progress', 'conditional'].includes(s)) {
     cls = 'badge-warning';
   } else if (['ready_for_pickup'].includes(s)) {
     cls = 'badge-info';
-  } else if (['rejected', 'failed', 'inactive', 'suspended', 'hold'].includes(s)) {
+  } else if (['rejected', 'failed', 'inactive', 'suspended', 'hold', 'dropped'].includes(s)) {
     cls = 'badge-danger';
   }
 

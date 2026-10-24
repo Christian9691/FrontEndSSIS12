@@ -90,20 +90,19 @@ button, input, select, textarea {
 }
 
 .university-crest {
-  width: 84px;
-  height: 84px;
+  width: 68px;
+  height: 68px;
   margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-}
-
-.university-crest img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 10px rgba(27, 83, 52, 0.3);
+  border: 3px solid #fef3c7;
 }
 
 .login-header h1 {
@@ -236,9 +235,9 @@ textarea,
   top: 0.85rem;
   height: calc(100vh - 1.7rem);
   margin: 0.85rem 0 0.85rem 0.95rem;
-  width: 250px;
-  min-width: 250px;
-  max-width: 250px;
+  width: 272px;
+  min-width: 272px;
+  max-width: 272px;
   background: linear-gradient(180deg, var(--primary-dark) 0%, #071f11 100%);
   color: #fff;
   display: flex;
@@ -267,11 +266,11 @@ textarea,
 
 /* Sidebar Brand Header */
 .sidebar-brand {
-  padding: 1.35rem 1.25rem 1.15rem;
+  padding: 1.35rem 1rem 1.15rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
   transition: padding 0.2s ease, justify-content 0.2s ease;
   position: relative;
 }
@@ -282,21 +281,20 @@ textarea,
 }
 
 .brand-crest {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #fff;
   flex-shrink: 0;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
-  transition: transform 0.18s ease;
-}
-
-.brand-crest img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .brand-crest:hover {
@@ -306,10 +304,15 @@ textarea,
 .brand-info {
   white-space: nowrap;
   overflow: hidden;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-right: 2px; /* prevents last letter from being clipped */
 }
 
 .brand-info h2 {
-  font-size: 1.02rem;
+  overflow: visible;
+  text-overflow: clip;
+  font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #fff;
@@ -318,7 +321,7 @@ textarea,
 }
 
 .brand-info p {
-  font-size: 0.7rem;
+  font-size: 0.64rem;
   color: #a4ceb5;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1200,14 +1203,40 @@ tbody tr:last-child td {
     display: none !important;
   }
 
-  /* Flatten modal overlays directly into the page canvas */
-  .modal-overlay {
+  /* When a modal is open, print ONLY the modal (no blank leading page).
+     Everything else is made invisible and the modal is pulled to the
+     top-left of the page so the hidden layout can't push it to page 2. */
+  body:has(.modal-overlay) * {
+    visibility: hidden !important;
+  }
+
+  body:has(.modal-overlay) .app-shell,
+  body:has(.modal-overlay) .app-main,
+  body:has(.modal-overlay) .content-container {
     position: static !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body:has(.modal-overlay) .modal-overlay,
+  body:has(.modal-overlay) .modal-overlay * {
+    visibility: visible !important;
+  }
+
+  .modal-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     padding: 0 !important;
     margin: 0 !important;
     display: block !important;
-    inset: auto !important;
+    inset: 0 auto auto 0 !important;
     width: 100% !important;
     height: auto !important;
     overflow: hidden !important;
